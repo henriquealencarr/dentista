@@ -904,8 +904,9 @@
   outline: none;
   box-sizing: border-box;
   display: block;
+  text-align: center;
 }
-.ef-input::placeholder { color: #bbb; }
+.ef-input::placeholder { color: #bbb; text-align: center; }
 
 .ef-select {
   width: 100%;
@@ -919,6 +920,7 @@
   cursor: pointer;
   appearance: none;
   display: block;
+  text-align: center;
 }
 
 .editar-clear-btn {
