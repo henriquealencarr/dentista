@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assistente Dental</title>
+  <link rel="stylesheet" href="chatadvogado.css">
+<style>
+  /* ── Client Searchable Dropdown ──────────────────────── */
+  .client-search-wrap { position: relative; }
+  .client-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    z-index: 999;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+  .client-dropdown.open { display: block; }
+  .client-dropdown-item {
+    padding: 10px 14px;
+    font-size: 14px;
+    color: var(--text);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .client-dropdown-item:hover { background: #f8fafd; }
+  .client-dropdown-item.selected { background: #f0f4ff; font-weight: 600; }
+  .client-dropdown-empty {
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* ── Panel Tabs (Clientes / Documentos) ──────────────── */
+  .panel-tabs {
+    display: flex;
+    gap: 2px;
+    width: 100%;
+  }
+  .panel-tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: none;
+    background: transparent;
+    border-radius: 8px 8px 0 0;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .panel-tab:hover { color: var(--accent); }
+  .panel-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* ── Documentos Panel ─────────────────────────────────── */
+  .docs-list-wrap {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 14px;
+    background: #f8fafd;
+  }
+  .docs-list { display: flex; flex-direction: column; gap: 10px; }
+  .docs-loading { text-align: center; color: var(--muted); padding: 40px; font-size: 13px; }
+  .doc-card {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: box-shadow 0.2s;
+  }
+  .doc-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+  .doc-icon {
+    width: 42px;
+    height: 42px;
+    background: #fff1e6;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .doc-info { flex: 1; min-width: 0; }
+  .doc-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .doc-meta {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+  .doc-card-btn {
+    padding: 7px 14px;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s, color 0.2s;
+    flex-shrink: 0;
+  }
+  .doc-card-btn:hover { background: var(--accent); color: white; }
+
+  /* ── Nav Tabs ─────────────────────────────────────────── */
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 8px 12px 0;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: none;
+    background: transparent;
+    border-radius: 8px 8px 0 0;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-light);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .nav-tab:hover { color: var(--accent); }
+  .nav-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    background: var(--bg);
+  }
+
+  /* ── Clients Panel ────────────────────────────────────── */
+  .clients-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg);
+  }
+  .clients-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    background: #f8fafd;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .clients-search-wrap {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fafaf9;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+  }
+  .clients-search-wrap svg { color: var(--text-light); flex-shrink: 0; }
+  .clients-search-wrap input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--text);
+    width: 100%;
+  }
+  .clients-search-wrap input::placeholder { color: var(--text-light); }
+  .select-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+  #statusFilter {
+    padding: 8px 30px 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    background: #f0f0ef;
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+  }
+  #statusFilter:hover { background-color: #e9e9e7; border-color: var(--accent); }
+  .select-arrow {
+    position: absolute;
+    right: 8px;
+    pointer-events: none;
+    transition: transform 0.25s ease;
+  }
+  .select-wrap.open .select-arrow {
+    transform: rotate(180deg);
+  }
+  .refresh-btn {
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #f0f0ef;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #374151;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+  }
+  .refresh-btn:hover { color: var(--accent); border-color: var(--accent); background: #e9e9e7; }
+  .clients-count {
+    padding: 10px 16px;
+    font-size: 12px;
+    color: var(--text-light);
+    font-weight: 500;
+    background: #f8fafd;
+  }
+  .table-wrap {
+    flex: 1;
+    overflow: auto;
+    background: #f8fafd;
+  }
+  .clients-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: #ffffff;
+  }
+  .clients-table thead th {
+    position: sticky;
+    top: 0;
+    background: #f7f7f5;
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #6b7280;
+    border-bottom: 1px solid var(--border);
+    border-top: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .clients-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .clients-table tbody tr:hover { background: var(--surface); }
+  .clients-table tbody td {
+    padding: 11px 14px;
+    color: var(--text);
+    vertical-align: middle;
+  }
+  .clients-table .client-name { font-weight: 600; }
+  .clients-table .table-loading {
+    text-align: center;
+    color: var(--text-light);
+    padding: 40px;
+  }
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .status-todo     { background: #f0f0ef; color: #6b7280; }
+  .status-progress { background: #fef3c7; color: #92400e; }
+  .status-done     { background: #dcfce7; color: #166534; }
+
+  /* ── Row Hover ────────────────────────────────────────── */
+  .clients-table tbody tr:hover {
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.09);
+  }
+  .clients-table tbody tr:hover td {
+    background: #fff;
+  }
+
+  /* ── Desktop Split Layout ─────────────────────────────── */
+  @media (min-width: 768px) {
+    body {
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      padding: 0;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .app-wrapper {
+      display: flex;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Hide tabs on desktop */
+    .nav-tabs { display: none; }
+
+    /* Clients panel: left column */
+    #panel-clientes {
+      display: flex !important;
+      flex-direction: column;
+      width: 45%;
+      min-width: 340px;
+      max-width: 45%;
+      height: 100vh;
+      border-right: 1px solid var(--border);
+      background: var(--bg);
+    }
+
+    /* Clients panel header */
+    .clients-panel-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--border);
+      background: #f8fafd;
+    }
+    .clients-panel-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Chat: right column */
+    #panel-chat {
+      display: flex !important;
+      flex-direction: column;
+      flex: 1;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      height: 100vh;
+      max-width: 100%;
+      border-radius: 0;
+      box-shadow: none;
+    }
+  }
+
+  /* Mobile: keep tabs, hide panel-clientes by default */
+  @media (max-width: 767px) {
+    .clients-panel-header { display: none; }
+    #panel-clientes { display: none; }
+    #panel-chat { display: flex; flex-direction: column; }
+  }
+
+
+  /* ── Floating Side Buttons ───────────────────────────── */
+  .floating-side-btns {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 10;
+  }
+  .floating-side-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .floating-side-btn:hover {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  #panel-chat { position: relative; }
+  #panel-chat .chat-container { padding-left: 64px; }
+
+</style>
+</head>
+<body>
+
+<div class="app-wrapper">
+
+<!-- Clients Panel -->
+<div id="panel-clientes" class="clients-panel">
+
+  <!-- Abas do painel -->
+  <div class="clients-panel-header">
+    <div class="panel-tabs">
+      <button class="panel-tab active" id="ptab-clientes" onclick="switchPanelTab('clientes')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Pacientes
+      </button>
+      <button class="panel-tab" id="ptab-documentos" onclick="switchPanelTab('documentos')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Documentos
+      </button>
+    </div>
+  </div>
+
+  <!-- Sub-painel: Clientes -->
+  <div id="sub-clientes" style="display:flex; flex-direction:column; flex:1; overflow:hidden;">
+    <div class="clients-toolbar">
+      <div class="clients-search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="clientSearch" placeholder="Buscar por nome, tratamento ou dentista..." oninput="filterClients()" />
+      </div>
+      <div class="select-wrap">
+        <select id="statusFilter" onchange="filterClients()" onfocus="this.parentElement.classList.add('open')" onblur="this.parentElement.classList.remove('open')">
+          <option value="">Todos os status</option>
+          <option value="Todo">Todo</option>
+          <option value="In progress">In progress</option>
+          <option value="Done">Done</option>
+        </select>
+        <svg class="select-arrow" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <button class="refresh-btn" onclick="loadClientsTable()" title="Atualizar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      </button>
+    </div>
+    <div class="clients-count" id="clientsCount">Carregando...</div>
+    <div class="table-wrap">
+      <table class="clients-table">
+        <thead>
+          <tr>
+            <th>Foto</th>
+            <th>Paciente</th>
+            <th>Tratamento</th>
+            <th>Dentista</th>
+            <th>Status</th>
+            <th>Consulta</th>
+            <th>Telefone</th>
+          </tr>
+        </thead>
+        <tbody id="clientsTableBody">
+          <tr><td colspan="6" class="table-loading">Carregando clientes...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Sub-painel: Documentos -->
+  <div id="sub-documentos" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
+    <div class="clients-toolbar" style="gap:8px;">
+      <div class="clients-search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="docSearch" placeholder="Buscar documento..." oninput="filterDocs()" />
+      </div>
+      <button class="refresh-btn" onclick="loadDocumentsPanel(true)" title="Atualizar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      </button>
+    </div>
+    <div class="clients-count" id="docsCount">Carregando...</div>
+    <div class="docs-list-wrap">
+      <div class="docs-list" id="docsList">
+        <div class="docs-loading">Carregando documentos...</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+
+<div id="panel-chat">
+<div class="floating-side-btns">
+  <button class="floating-side-btn" title="Ver pacientes" onclick="openSearchClientModal()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+  </button>
+  <button class="floating-side-btn" title="Resumir documentos" onclick="sendShortcut('Resuma os documentos disponíveis')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+  </button>
+  <button class="floating-side-btn" title="Upload client photo" onclick="openModal()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+  </button>
+</div>
+<div class="chat-container">
+
+  <div class="header">
+    <div class="avatar">🦷</div>
+    <div class="header-info">
+      <h1>Assistente Dental</h1>
+      <p><span class="status-dot"></span>Online</p>
+    </div>
+  </div>
+<!-- Nav Tabs -->
+<div class="nav-tabs">
+  <button class="nav-tab active" id="tab-chat" onclick="switchTab('chat')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    Chat
+  </button>
+  <button class="nav-tab" id="tab-clientes" onclick="switchTab('clientes')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Pacientes
+  </button>
+</div>
+
+  <div class="messages" id="messages">
+    <div class="empty-state" id="emptyState">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 01-.923 1.785A5.969 5.969 0 006 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337z"/>
+      </svg>
+      <h2>Nenhuma conversa ainda</h2>
+      <p>Digite sua primeira pergunta abaixo.</p>
+    </div>
+  </div>
+
+  <div class="typing" id="typing">
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+
+
+  <div class="input-area">
+    <div class="input-wrapper">
+      <textarea
+        id="input"
+        placeholder="Digite sua pergunta odontológica..."
+        rows="1"
+        onkeydown="handleKey(event)"
+        oninput="autoResize(this)"
+      ></textarea>
+    </div>
+    <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Send">
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+
+</div><!-- /panel-chat -->
+
+
+</div><!-- /chat-container -->
+</div><!-- /panel-chat -->
+</div><!-- /app-wrapper -->
+
+<!-- Search Client Modal -->
+<div class="modal-overlay" id="searchClientOverlay" onclick="handleSearchOverlayClick(event)">
+  <div class="modal">
+    <h2>🔍 Buscar Paciente</h2>
+    <div>
+      <label>Nome do Paciente</label>
+      <div class="client-search-wrap" id="searchClientWrap">
+        <input
+          type="text"
+          id="searchClientInput"
+          placeholder="Search client..."
+          autocomplete="off"
+          oninput="filterSearchClientDropdown()"
+          onfocus="openSearchClientDropdown()"
+          style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;color:var(--text);outline:none;background:white;transition:border-color 0.2s;box-sizing:border-box;"
+        />
+        <div class="client-dropdown" id="searchClientDropdown"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeSearchClientModal()">Cancel</button>
+      <button class="btn-upload" id="searchClientBtn" onclick="sendClientSearch()" disabled>
+        Buscar Paciente
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Upload Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <h2>📷 Atualizar Foto do Paciente</h2>
+
+    <div>
+      <label>Nome do Paciente</label>
+      <div class="client-search-wrap" id="clientSearchWrap">
+        <input
+          type="text"
+          id="clientNameInput"
+          placeholder="Search client..."
+          autocomplete="off"
+          oninput="filterClientDropdown()"
+          onfocus="openClientDropdown()"
+          style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;color:var(--text);outline:none;background:white;transition:border-color 0.2s;box-sizing:border-box;"
+        />
+        <div class="client-dropdown" id="clientDropdown"></div>
+      </div>
+    </div>
+
+    <div>
+      <label>Photo</label>
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="fileInput" accept="image/*" onchange="handleFileSelect(event)" />
+        <div class="drop-zone-icon">🖼️</div>
+        <p><span>Click to select</span> or drag & drop</p>
+        <p style="font-size:11px;margin-top:4px;">JPG, PNG, WEBP — max 5MB</p>
+      </div>
+      <div class="preview-wrap" id="previewWrap">
+        <img id="previewImg" src="" alt="preview" />
+        <div class="preview-info">
+          <div class="preview-name" id="previewName"></div>
+          <div class="preview-size" id="previewSize"></div>
+        </div>
+        <button class="remove-img" onclick="removeImage()" title="Remove">✕</button>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-upload" id="uploadBtn" onclick="uploadImage()" disabled>
+        <div class="spinner" id="uploadSpinner"></div>
+        Upload Photo
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const SUPABASE_URL  = 'https://emzovjkimtwpebbyujvd.supabase.co';
+  const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtem92amtpbXR3cGViYnl1anZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NjUxNTYsImV4cCI6MjA5NDU0MTE1Nn0.KydYgZbQOBjaT7dIMVz7eVW1dwmOKM-xjxTePGFYEpk';
+  const N8N_WEBHOOK        = 'https://n8n.srv1497968.hstgr.cloud/webhook/7a0384de-70be-4b01-9141-977ba6f274d9';
+  const N8N_UPLOAD_WEBHOOK = 'https://n8n.srv1497968.hstgr.cloud/webhook/upload-image_mesmofluxo';
+  const SESSION_ID    = '259d294ef1a04bea8725443d18dd6147';
+
+  let selectedFile = null;
+
+  // ── Modal ──────────────────────────────────────────────
+  let clientNames = [];
+  let selectedClientName = '';
+
+  async function loadClients() {
+    const input = document.getElementById('clientNameInput');
+    input.placeholder = 'Loading...';
+    input.disabled = true;
+    clientNames = [];
+    try {
+      const res = await fetch(
+        'https://api.airtable.com/v0/app0NITiJOMkdsr7k/tblq2FbjhoVHW96pM?fields[]=Client%20Name',
+        { headers: { Authorization: 'Bearer patWffLOnbunOhwvC.553c4058fa5397af57a7646c0a8c76e179bba649c16f16e847fc68646a51001b' } }
+      );
+      const data = await res.json();
+      clientNames = data.records
+        .map(r => r.fields['Client Name'])
+        .filter(Boolean)
+        .sort();
+    } catch (err) {
+      clientNames = [];
+    }
+    input.placeholder = 'Search client...';
+    input.disabled = false;
+    checkUploadReady();
+  }
+
+  function openClientDropdown() {
+    filterClientDropdown();
+    document.getElementById('clientDropdown').classList.add('open');
+  }
+
+  function filterClientDropdown() {
+    const query = document.getElementById('clientNameInput').value.toLowerCase();
+    const dropdown = document.getElementById('clientDropdown');
+    const filtered = clientNames.filter(n => n.toLowerCase().includes(query));
+
+    if (filtered.length === 0) {
+      dropdown.innerHTML = '<div class="client-dropdown-empty">No clients found</div>';
+    } else {
+      dropdown.innerHTML = filtered.map(name => {
+        const safe = name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        return `<div class="client-dropdown-item ${name === selectedClientName ? 'selected' : ''}" data-name="${safe}">${safe}</div>`;
+      }).join('');
+
+      dropdown.querySelectorAll('.client-dropdown-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectClient(item.dataset.name);
+        });
+      });
+    }
+    dropdown.classList.add('open');
+  }
+
+  function selectClient(name) {
+    selectedClientName = name;
+    document.getElementById('clientNameInput').value = name;
+    document.getElementById('clientDropdown').classList.remove('open');
+    checkUploadReady();
+  }
+
+  // Fecha dropdowns ao clicar fora
+  document.addEventListener('click', (e) => {
+    const wrap = document.getElementById('clientSearchWrap');
+    if (wrap && !wrap.contains(e.target)) {
+      document.getElementById('clientDropdown').classList.remove('open');
+    }
+    const wrap2 = document.getElementById('searchClientWrap');
+    if (wrap2 && !wrap2.contains(e.target)) {
+      document.getElementById('searchClientDropdown').classList.remove('open');
+    }
+  });
+
+  // ── Search Client Modal ────────────────────────────────
+  let selectedSearchClient = '';
+
+  function openSearchClientModal() {
+    selectedSearchClient = '';
+    document.getElementById('searchClientInput').value = '';
+    document.getElementById('searchClientBtn').disabled = true;
+    document.getElementById('searchClientOverlay').classList.add('visible');
+    if (clientNames.length === 0) loadClientsForSearch();
+  }
+
+  async function loadClientsForSearch() {
+    if (clientNames.length > 0) return; // já carregados pelo modal de upload
+    const input = document.getElementById('searchClientInput');
+    input.placeholder = 'Loading...';
+    input.disabled = true;
+    try {
+      const res = await fetch(
+        'https://api.airtable.com/v0/app0NITiJOMkdsr7k/tblq2FbjhoVHW96pM?fields[]=Client%20Name',
+        { headers: { Authorization: 'Bearer patWffLOnbunOhwvC.553c4058fa5397af57a7646c0a8c76e179bba649c16f16e847fc68646a51001b' } }
+      );
+      const data = await res.json();
+      clientNames = data.records.map(r => r.fields['Client Name']).filter(Boolean).sort();
+    } catch {}
+    input.placeholder = 'Search client...';
+    input.disabled = false;
+  }
+
+  function openSearchClientDropdown() {
+    filterSearchClientDropdown();
+    document.getElementById('searchClientDropdown').classList.add('open');
+  }
+
+  function filterSearchClientDropdown() {
+    const query = document.getElementById('searchClientInput').value.toLowerCase();
+    const dropdown = document.getElementById('searchClientDropdown');
+    const filtered = clientNames.filter(n => n.toLowerCase().includes(query));
+
+    if (filtered.length === 0) {
+      dropdown.innerHTML = '<div class="client-dropdown-empty">No clients found</div>';
+    } else {
+      dropdown.innerHTML = filtered.map(name => {
+        const safe = name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        return `<div class="client-dropdown-item ${name === selectedSearchClient ? 'selected' : ''}" data-name="${safe}">${safe}</div>`;
+      }).join('');
+
+      dropdown.querySelectorAll('.client-dropdown-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectSearchClient(item.dataset.name);
+        });
+      });
+    }
+    dropdown.classList.add('open');
+  }
+
+  function selectSearchClient(name) {
+    selectedSearchClient = name;
+    document.getElementById('searchClientInput').value = name;
+    document.getElementById('searchClientDropdown').classList.remove('open');
+    document.getElementById('searchClientBtn').disabled = false;
+  }
+
+  function closeSearchClientModal() {
+    document.getElementById('searchClientOverlay').classList.remove('visible');
+    selectedSearchClient = '';
+    document.getElementById('searchClientInput').value = '';
+    document.getElementById('searchClientDropdown').classList.remove('open');
+  }
+
+  function handleSearchOverlayClick(e) {
+    if (e.target === document.getElementById('searchClientOverlay')) closeSearchClientModal();
+  }
+
+  function sendClientSearch() {
+    if (!selectedSearchClient) return;
+    const name = selectedSearchClient;
+    closeSearchClientModal();
+    sendShortcut(`Mostre os dados do paciente ${name} no banco de dados`);
+  }
+
+  function openModal() {
+    document.getElementById('modalOverlay').classList.add('visible');
+    loadClients();
+  }
+
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('visible');
+    removeImage();
+    document.getElementById('clientNameInput').value = '';
+    selectedClientName = '';
+    document.getElementById('clientDropdown').classList.remove('open');
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('modalOverlay')) closeModal();
+  }
+
+  // ── File handling ──────────────────────────────────────
+  function handleFileSelect(e) {
+    const file = e.target.files[0];
+    if (file) setFile(file);
+  }
+
+  function setFile(file) {
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('Image too large — max 5MB', false);
+      return;
+    }
+    selectedFile = file;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      document.getElementById('previewImg').src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+
+    document.getElementById('previewName').textContent = file.name;
+    document.getElementById('previewSize').textContent = (file.size / 1024).toFixed(1) + ' KB';
+    document.getElementById('previewWrap').classList.add('visible');
+    document.getElementById('dropZone').style.display = 'none';
+    checkUploadReady();
+  }
+
+  function removeImage() {
+    selectedFile = null;
+    document.getElementById('fileInput').value = '';
+    document.getElementById('previewWrap').classList.remove('visible');
+    document.getElementById('dropZone').style.display = '';
+    document.getElementById('previewImg').src = '';
+    checkUploadReady();
+  }
+
+  function checkUploadReady() {
+    document.getElementById('uploadBtn').disabled = !(selectedClientName && selectedFile);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+
+    // Drag & drop
+    const dropZone = document.getElementById('dropZone');
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) setFile(file);
+    });
+  });
+
+  // ── Upload ─────────────────────────────────────────────
+  async function uploadImage() {
+    const clientName = selectedClientName;
+    if (!clientName || !selectedFile) return;
+
+    const btn     = document.getElementById('uploadBtn');
+    const spinner = document.getElementById('uploadSpinner');
+    btn.disabled  = true;
+    spinner.classList.add('visible');
+
+    try {
+      const formData = new FormData();
+      formData.append('clientName', clientName);
+      formData.append('file', selectedFile, selectedFile.name);
+
+      const res = await fetch(N8N_UPLOAD_WEBHOOK, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!res.ok) throw new Error(`Status ${res.status}`);
+
+      showToast(`Photo updated for ${clientName}!`, true);
+      closeModal();
+    } catch (err) {
+      console.error('[uploadImage]', err);
+      showToast('Upload failed: ' + err.message, false);
+    } finally {
+      btn.disabled = false;
+      spinner.classList.remove('visible');
+    }
+  }
+
+  // ── Chat ───────────────────────────────────────────────
+  async function loadHistory(appendOnly = false) {
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/n8n_chat_histories?order=id.asc`,
+        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const rows = await res.json();
+      renderMessages(rows, appendOnly);
+    } catch (err) {
+      showToast('Error loading chat history.', false);
+    }
+  }
+
+  let lastRenderedCount = 0;
+
+  function renderMessages(rows, appendOnly = false) {
+    const container = document.getElementById('messages');
+    const empty     = document.getElementById('emptyState');
+
+    if (!rows || rows.length === 0) {
+      if (!appendOnly) {
+        container.innerHTML = '';
+        container.appendChild(empty);
+      }
+      return;
+    }
+
+    const displayable = rows.filter(row => {
+      const msg  = row.message || {};
+      const text = typeof msg.content === 'string' ? msg.content.trim() : '';
+      return isDisplayable(msg.type, text);
+    });
+
+    if (!appendOnly) {
+      container.innerHTML = '';
+      lastRenderedCount = 0;
+    }
+
+    const toRender = displayable.slice(lastRenderedCount);
+    toRender.forEach(row => {
+      const msg  = row.message || {};
+      const text = typeof msg.content === 'string' ? msg.content.trim() : '';
+      // Em appendOnly, ignora mensagens humanas (já renderizadas otimisticamente)
+      if (appendOnly && msg.type === 'human') return;
+      const div = document.createElement('div');
+      div.className = `message ${msg.type === 'human' ? 'user' : 'ai'}`;
+      div.innerHTML = `<div class="bubble">${formatMessage(text)}</div>`;
+      container.appendChild(div);
+    });
+
+    lastRenderedCount = displayable.length;
+    scrollToBottom();
+  }
+
+  function sendShortcut(text) {
+    const input = document.getElementById('input');
+    input.value = text;
+    autoResize(input);
+    sendMessage();
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById('input');
+    const text  = input.value.trim();
+    if (!text) return;
+
+    setLoading(true);
+    input.value = '';
+    autoResize(input);
+
+    // Adiciona mensagem do usuário imediatamente na tela
+    const container = document.getElementById('messages');
+    const emptyState = document.getElementById('emptyState');
+    if (emptyState && emptyState.parentNode === container) container.removeChild(emptyState);
+    const userDiv = document.createElement('div');
+    userDiv.className = 'message user';
+    userDiv.innerHTML = '<div class="bubble">' + text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>') + '</div>';
+    container.appendChild(userDiv);
+    lastRenderedCount++;
+    scrollToBottom();
+
+    showTyping(true);
+
+    try {
+      const res = await fetch(N8N_WEBHOOK, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chatInput: text, sessionId: SESSION_ID })
+      });
+
+      if (!res.ok) {
+        const body = await res.text().catch(() => '');
+        console.error('n8n error:', res.status, body);
+        throw new Error(`Status ${res.status}`);
+      }
+      await pollForReply();
+    } catch (err) {
+      console.error('[sendMessage] Error:', err);
+      showToast('Error sending message: ' + (err.message || 'check the console'), false);
+      showTyping(false);
+      setLoading(false);
+    }
+  }
+
+  async function pollForReply() {
+    const countBefore = document.getElementById('messages').querySelectorAll('.message.ai').length;
+    const maxTries = 30;
+    let tries = 0;
+
+    const check = async () => {
+      tries++;
+      await loadHistory(true);
+      const countAfter = document.getElementById('messages').querySelectorAll('.message.ai').length;
+
+      if (countAfter > countBefore) {
+        showTyping(false);
+        setLoading(false);
+        return;
+      }
+
+      if (tries >= maxTries) {
+        showTyping(false);
+        setLoading(false);
+        showToast('The AI took too long to respond. Please try reloading.', false);
+        return;
+      }
+
+      setTimeout(check, 2000);
+    };
+
+    setTimeout(check, 2000);
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+  }
+
+  function setLoading(state) {
+    document.getElementById('sendBtn').disabled = state;
+    document.getElementById('input').disabled   = state;
+  }
+
+  function showTyping(state) {
+    document.getElementById('typing').classList.toggle('visible', state);
+    scrollToBottom();
+  }
+
+  function scrollToBottom() {
+    const c = document.getElementById('messages');
+    setTimeout(() => c.scrollTop = c.scrollHeight, 50);
+  }
+
+  function isDisplayable(type, text) {
+    if (type !== 'human' && type !== 'ai') return false;
+    if (!text) return false;
+    if (text.startsWith('Calling ')) return false;
+    try { const p = JSON.parse(text); if (typeof p === 'object') return false; } catch {}
+    return true;
+  }
+
+  function formatMessage(text) {
+    text = text.replace(/\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/g, '$2');
+    const urlRegex = /(https?:\/\/[^\s<>"]+)/g;
+    const parts = [];
+    let last = 0;
+    let match;
+
+    while ((match = urlRegex.exec(text)) !== null) {
+      if (match.index > last) parts.push({ type: 'text', value: text.slice(last, match.index) });
+      parts.push({ type: 'url', value: match[0] });
+      last = match.index + match[0].length;
+    }
+    if (last < text.length) parts.push({ type: 'text', value: text.slice(last) });
+
+    return parts.map(part => {
+      if (part.type === 'url') {
+        const escaped = escapeAttr(part.value);
+        return `<img src="${escaped}" alt="image" loading="lazy"
+          onerror="tryFreshImage(this,'${escaped}')"
+          onclick="window.open('${escaped}','_blank')"
+        >`;
+      }
+      return part.value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/(\d+\.\s)/g, '<br>$1')
+        .replace(/\n/g, '<br>');
+    }).join('');
+  }
+
+  function escapeAttr(str) {
+    return str.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function showToast(msg, success = false) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast' + (success ? ' success' : '') + ' show';
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  loadHistory();
+
+
+  // ── AIRTABLE CONFIG ──────────────────────────────────────
+  const AIRTABLE_TOKEN   = 'patWffLOnbunOhwvC.553c4058fa5397af57a7646c0a8c76e179bba649c16f16e847fc68646a51001b';
+  const AIRTABLE_BASE    = 'app0NITiJOMkdsr7k';
+  const AIRTABLE_TABLE   = 'tblq2FbjhoVHW96pM';
+
+  let allClients = [];
+  let freshImageMap = {}; // attachmentId → URL fresquinha
+
+  function buildFreshImageMap() {
+    freshImageMap = {};
+    allClients.forEach(r => {
+      const images = r.fields['Image'];
+      if (Array.isArray(images)) {
+        images.forEach(img => {
+          if (img.id && img.url) freshImageMap[img.id] = img.url;
+        });
+      }
+    });
+  }
+
+  function tryFreshImage(imgEl, expiredUrl) {
+    // Extrai o ID do anexo da URL do Airtable
+    // Formato: https://v5.airtableusercontent.com/v3/u/XX/XX/TIMESTAMP/att.../
+    const match = expiredUrl.match(/\/(att\w+)\//);
+    if (match) {
+      const freshUrl = freshImageMap[match[1]];
+      if (freshUrl) {
+        imgEl.onerror = null;
+        imgEl.src = freshUrl;
+        return;
+      }
+    }
+    // Fallback: mostra link
+    const escaped = expiredUrl.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    imgEl.outerHTML = `<a href="${escaped}" target="_blank" rel="noopener">🔗 View link</a>`;
+  }
+
+  // ── TAB SWITCHING ─────────────────────────────────────────
+  function switchTab(tab) {
+    const isDesktop = window.innerWidth >= 768;
+    if (isDesktop) return; // CSS handles layout on desktop
+    // Mobile: toggle panels via inline style
+    document.getElementById('panel-chat').style.display     = tab === 'chat'     ? 'flex' : 'none';
+    document.getElementById('panel-clientes').style.display = tab === 'clientes' ? 'flex' : 'none';
+    document.getElementById('tab-chat').classList.toggle('active',     tab === 'chat');
+    document.getElementById('tab-clientes').classList.toggle('active', tab === 'clientes');
+    if (tab === 'clientes' && allClients.length === 0) loadClientsTable();
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    loadClientsTable(); // always load on start
+  });
+
+  // ── LOAD CLIENTS TABLE ────────────────────────────────────
+  async function loadClientsTable() {
+    const tbody = document.getElementById('clientsTableBody');
+    tbody.innerHTML = '<tr><td colspan="6" class="table-loading">Carregando clientes...</td></tr>';
+    document.getElementById('clientsCount').textContent = 'Carregando...';
+    allClients = [];
+
+    let offset = '';
+    try {
+      do {
+        const url = new URL(`https://api.airtable.com/v0/${AIRTABLE_BASE}/${AIRTABLE_TABLE}`);
+        url.searchParams.set('fields[]', 'Client Name');
+        url.searchParams.append('fields[]', 'Case Name');
+        url.searchParams.append('fields[]', 'Lawyer');
+        url.searchParams.append('fields[]', 'Status');
+        url.searchParams.append('fields[]', 'Deadline');
+        url.searchParams.append('fields[]', 'Phone');
+        url.searchParams.append('fields[]', 'Image');
+        url.searchParams.set('pageSize', '100');
+        if (offset) url.searchParams.set('offset', offset);
+
+        const res  = await fetch(url.toString(), { headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` } });
+        const data = await res.json();
+        allClients.push(...(data.records || []));
+        offset = data.offset || '';
+      } while (offset);
+
+      renderClientsTable(allClients);
+      buildFreshImageMap();
+    } catch(e) {
+      tbody.innerHTML = `<tr><td colspan="6" class="table-loading">Erro ao carregar dados.</td></tr>`;
+      document.getElementById('clientsCount').textContent = 'Erro';
+    }
+  }
+
+  function renderClientsTable(records) {
+    const tbody = document.getElementById('clientsTableBody');
+
+    if (records.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="table-loading">Nenhum paciente encontrado.</td></tr>';
+      document.getElementById('clientsCount').textContent = '0 paciente(s) encontrado(s)';
+      return;
+    }
+
+    document.getElementById('clientsCount').textContent = `${records.length} paciente(s) encontrado(s)`;
+
+    tbody.innerHTML = records.map(r => {
+      const f = r.fields;
+      const name     = f['Client Name'] || '—';
+      const caseName = f['Case Name']   || '—';
+      const lawyer   = f['Lawyer']      || '—';
+      const status   = f['Status']      || '—';
+      const deadlineVal = f['Deadline'];
+      const deadline = deadlineVal ? new Date(deadlineVal).toLocaleDateString('pt-BR') : '—';
+      const phone    = f['Phone']       || '—';
+
+      let badgeClass = 'status-todo';
+      if (status === 'In progress') badgeClass = 'status-progress';
+      else if (status === 'Done')   badgeClass = 'status-done';
+
+      const image = f['Image'] && f['Image'][0] ? f['Image'][0].url : null;
+      const imgHtml = image
+        ? `<img src="${image}" alt="${name}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;display:block;">`
+        : `<div style="width:36px;height:36px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;">👤</div>`;
+
+      return `<tr>
+        <td style="width:44px;">${imgHtml}</td>
+        <td class="client-name">${name}</td>
+        <td>${caseName}</td>
+        <td>${lawyer}</td>
+        <td><span class="status-badge ${badgeClass}">${status}</span></td>
+        <td>${deadline}</td>
+        <td>${phone}</td>
+      </tr>`;
+    }).join('');
+
+  }
+
+  // ── PANEL TAB SWITCHING ───────────────────────────────────
+  function switchPanelTab(tab) {
+    document.getElementById('sub-clientes').style.display   = tab === 'clientes'   ? 'flex' : 'none';
+    document.getElementById('sub-documentos').style.display = tab === 'documentos' ? 'flex' : 'none';
+    document.getElementById('ptab-clientes').classList.toggle('active',   tab === 'clientes');
+    document.getElementById('ptab-documentos').classList.toggle('active', tab === 'documentos');
+    if (tab === 'documentos') loadDocumentsPanel();
+  }
+
+  // ── DOCUMENTS PANEL ───────────────────────────────────────
+  let allDocs = [];
+  let docsLoaded = false;
+
+  async function loadDocumentsPanel(force = false) {
+    if (docsLoaded && !force) return;
+    const list = document.getElementById('docsList');
+    document.getElementById('docsCount').textContent = 'Carregando...';
+    list.innerHTML = '<div class="docs-loading">Carregando documentos...</div>';
+    allDocs = [];
+
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/documents?select=id,metadata`,
+        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+      );
+      const rows = await res.json();
+
+      // Agrupa por file_name e conta chunks
+      const map = {};
+      rows.forEach(row => {
+        const name = (row.metadata && row.metadata.file_name) || 'Documento sem nome';
+        if (!map[name]) map[name] = { file_name: name, chunks: 0 };
+        map[name].chunks++;
+      });
+      allDocs = Object.values(map);
+      docsLoaded = true;
+      renderDocumentsPanel(allDocs);
+    } catch(e) {
+      list.innerHTML = '<div class="docs-loading">Erro ao carregar documentos.</div>';
+      document.getElementById('docsCount').textContent = 'Erro';
+    }
+  }
+
+  function renderDocumentsPanel(docs) {
+    const list = document.getElementById('docsList');
+    document.getElementById('docsCount').textContent = `${docs.length} documento(s) encontrado(s)`;
+
+    if (docs.length === 0) {
+      list.innerHTML = '<div class="docs-loading">Nenhum documento encontrado.</div>';
+      return;
+    }
+
+    list.innerHTML = docs.map(doc => {
+      const safeName = doc.file_name.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      const shortName = doc.file_name.replace(/\.pdf$/i, '');
+      return `
+        <div class="doc-card">
+          <div class="doc-icon">📄</div>
+          <div class="doc-info">
+            <div class="doc-name" title="${safeName}">${shortName}</div>
+            <div class="doc-meta">${doc.chunks} trechos indexados · PDF</div>
+          </div>
+          <button class="doc-card-btn" onclick="sendShortcut('Resuma o documento &quot;${safeName}&quot;')">
+            Resumir →
+          </button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function filterDocs() {
+    const query = document.getElementById('docSearch').value.toLowerCase();
+    const filtered = allDocs.filter(d => d.file_name.toLowerCase().includes(query));
+    renderDocumentsPanel(filtered);
+  }
+
+  function filterClients() {
+    const search = document.getElementById('clientSearch').value.toLowerCase();
+    const status = document.getElementById('statusFilter').value;
+
+    const filtered = allClients.filter(r => {
+      const f = r.fields;
+      const matchSearch = !search ||
+        (f['Client Name'] || '').toLowerCase().includes(search) ||
+        (f['Case Name']   || '').toLowerCase().includes(search) ||
+        (f['Lawyer']      || '').toLowerCase().includes(search);
+      const matchStatus = !status || (f['Status'] || '') === status;
+      return matchSearch && matchStatus;
+    });
+
+    renderClientsTable(filtered);
+  }
+
+</script>
+
+</body>
+</html>
