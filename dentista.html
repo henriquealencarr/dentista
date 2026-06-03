@@ -357,7 +357,7 @@
   const N8N_WEBHOOK        = 'https://n8n.srv1497968.hstgr.cloud/webhook/7a0384de-70be-4b01-9141-977ba6f274d9';
   const N8N_EDITAR_WEBHOOK = 'https://n8n.srv1497968.hstgr.cloud/webhook/alterar-dados';
   const N8N_UPLOAD_WEBHOOK = 'https://n8n.srv1497968.hstgr.cloud/webhook/upload-image_mesmofluxo';
-  const SESSION_ID    = '259d294ef1a04bea8725443d18dd6147';
+  const SESSION_ID = localStorage.getItem('session_id') || (() => { const id = crypto.randomUUID(); localStorage.setItem('session_id', id); return id; })();
 
   let selectedFile = null;
 
