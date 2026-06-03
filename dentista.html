@@ -1254,15 +1254,21 @@
     const originalLabel = btn.textContent;
     btn.textContent = 'Salvando...';
 
+    const record = allClients.find(r => r.fields['ClientName'] === name);
+    const currentImageUrl     = record?.fields['Image']?.[0]?.url     || null;
+    const currentProntuarioUrl = record?.fields['Prontuario']?.[0]?.url || null;
+
     const payload = {
-      action:     editarMode,
-      sessionId:  SESSION_ID,
-      clientName: name,
-      phone:      document.getElementById('ef-phone').value.trim(),
-      caseName:   document.getElementById('ef-case').value.trim(),
-      lawyer:     document.getElementById('ef-lawyer').value.trim(),
-      status:     document.getElementById('ef-status').value,
-      deadline:   document.getElementById('ef-deadline').value
+      action:               editarMode,
+      sessionId:            SESSION_ID,
+      clientName:           name,
+      phone:                document.getElementById('ef-phone').value.trim(),
+      caseName:             document.getElementById('ef-case').value.trim(),
+      lawyer:               document.getElementById('ef-lawyer').value.trim(),
+      status:               document.getElementById('ef-status').value,
+      deadline:             document.getElementById('ef-deadline').value,
+      currentImageUrl:      currentImageUrl,
+      currentProntuarioUrl: currentProntuarioUrl
     };
 
     try {
