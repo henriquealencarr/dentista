@@ -483,11 +483,10 @@
             <th>Status</th>
             <th>Consulta</th>
             <th>Telefone</th>
-            <th>Documentos</th>
           </tr>
         </thead>
         <tbody id="clientsTableBody">
-          <tr><td colspan="8" class="table-loading">Carregando clientes...</td></tr>
+          <tr><td colspan="7" class="table-loading">Carregando clientes...</td></tr>
         </tbody>
       </table>
     </div>
@@ -1215,7 +1214,7 @@
   // ── LOAD CLIENTS TABLE ────────────────────────────────────
   async function loadClientsTable() {
     const tbody = document.getElementById('clientsTableBody');
-    tbody.innerHTML = '<tr><td colspan="8" class="table-loading">Carregando clientes...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" class="table-loading">Carregando clientes...</td></tr>';
     document.getElementById('clientsCount').textContent = 'Carregando...';
     allClients = [];
 
@@ -1242,7 +1241,7 @@
       buildFreshImageMap();
     } catch(e) {
       console.error('[Airtable]', e);
-      tbody.innerHTML = `<tr><td colspan="8" class="table-loading">Erro: ${e.message}</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" class="table-loading">Erro: ${e.message}</td></tr>`;
       document.getElementById('clientsCount').textContent = 'Erro';
     }
   }
@@ -1251,7 +1250,7 @@
     const tbody = document.getElementById('clientsTableBody');
 
     if (records.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" class="table-loading">Nenhum paciente encontrado.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="table-loading">Nenhum paciente encontrado.</td></tr>';
       document.getElementById('clientsCount').textContent = '0 paciente(s) encontrado(s)';
       return;
     }
@@ -1279,21 +1278,20 @@
 
       const safeNameAttr = name.replace(/'/g, "\\'");
       const matchingDoc = allDocs.find(d => d.file_name.toLowerCase().includes(name.toLowerCase()));
-      const docBtn = matchingDoc
-        ? `<button onclick="summarizePatientDoc('${safeNameAttr}')" title="Resumir prontuário de ${name}" style="background:none;border:1px solid var(--border);border-radius:8px;padding:5px 8px;cursor:pointer;color:var(--accent);display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;font-family:inherit;transition:background 0.2s,color 0.2s;" onmouseover="this.style.background='var(--accent)';this.style.color='white'" onmouseout="this.style.background='none';this.style.color='var(--accent)'">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Ver
+      const docIcon = matchingDoc
+        ? `<button onclick="summarizePatientDoc('${safeNameAttr}')" title="Resumir prontuário" style="background:none;border:none;padding:2px 4px;cursor:pointer;color:var(--accent);display:inline-flex;align-items:center;vertical-align:middle;opacity:0.7;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           </button>`
-        : `<span style="color:var(--text-light);font-size:12px;">—</span>`;
+        : '';
 
       return `<tr>
         <td style="width:44px;">${imgHtml}</td>
-        <td class="client-name">${name}</td>
+        <td class="client-name">${name} ${docIcon}</td>
         <td>${caseName}</td>
         <td>${lawyer}</td>
         <td><span class="status-badge ${badgeClass}">${status}</span></td>
         <td>${deadline}</td>
         <td>${phone}</td>
-        <td>${docBtn}</td>
       </tr>`;
     }).join('');
 
