@@ -1266,7 +1266,9 @@
   }
 
   window.addEventListener('DOMContentLoaded', () => {
-    loadClientsTable();
+    loadClientsTable().then(() => {
+      if (docsLoaded) renderDocumentsPanel(allDocs);
+    });
     loadDocumentsPanel().then(() => {
       if (allClients.length > 0) renderClientsTable(allClients);
     });
@@ -1417,6 +1419,13 @@
     list.innerHTML = docs.map(doc => {
       const safeName = doc.file_name.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
       const shortName = doc.file_name.replace(/\.pdf$/i, '');
+      const baseName = doc.file_name.replace(/_prontuario\.pdf$/i, '').replace(/\.pdf$/i, '');
+      const pdfUrl = clientDocUrls[baseName] || '';
+      const downloadBtn = pdfUrl
+        ? `<a href="${pdfUrl}" target="_blank" class="doc-card-btn" style="text-decoration:none;margin-right:6px;" title="Download PDF">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13" style="vertical-align:middle;margin-right:3px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download
+          </a>`
+        : '';
       return `
         <div class="doc-card">
           <div class="doc-icon">📄</div>
@@ -1424,9 +1433,12 @@
             <div class="doc-name" title="${safeName}">${shortName}</div>
             <div class="doc-meta">${doc.chunks} trechos indexados · PDF</div>
           </div>
-          <button class="doc-card-btn" onclick="sendShortcut('Resuma o documento &quot;${safeName}&quot;')">
-            Resumir →
-          </button>
+          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+            ${downloadBtn}
+            <button class="doc-card-btn" onclick="sendShortcut('Resuma o documento &quot;${safeName}&quot;')">
+              Resumir →
+            </button>
+          </div>
         </div>
       `;
     }).join('');
