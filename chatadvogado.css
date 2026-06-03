@@ -844,3 +844,107 @@
   }
   #panel-chat { position: relative; }
   #panel-chat .chat-container { padding-left: 64px; }
+
+/* ── Editar Panel ─────────────────────────────────────────── */
+.editar-mode-bar {
+  display: flex;
+  gap: 6px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  background: #f8fafd;
+  flex-shrink: 0;
+}
+
+.editar-mode-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--text-light);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.editar-mode-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+.editar-mode-btn:not(.active):hover {
+  background: #f0f0ef;
+  color: var(--text);
+}
+
+.editar-form-table .editar-form-row td {
+  padding: 0;
+  background: #f8fbff;
+}
+.editar-form-table .editar-form-row td:first-child {
+  border-left: 3px solid var(--accent);
+}
+.editar-form-table .editar-form-row td:focus-within {
+  background: #edf4ff;
+  outline: 1px solid #a5c0e8;
+  outline-offset: -1px;
+}
+
+.ef-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text);
+  padding: 9px 10px;
+  outline: none;
+  box-sizing: border-box;
+  display: block;
+}
+.ef-input::placeholder { color: #bbb; }
+
+.ef-select {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text);
+  padding: 9px 10px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  display: block;
+}
+
+.editar-clear-btn {
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: white;
+  color: var(--text-light);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.editar-clear-btn:hover { background: #f0f0ef; color: var(--text); }
+
+.editar-submit-btn {
+  padding: 7px 16px;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: white;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.editar-submit-btn:hover { opacity: 0.88; }
+.editar-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
