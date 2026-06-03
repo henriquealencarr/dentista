@@ -687,12 +687,12 @@
     clientNames = [];
     try {
       const res = await fetch(
-        'https://api.airtable.com/v0/app0NITiJOMkdsr7k/tblq2FbjhoVHW96pM?fields[]=Client%20Name',
+        'https://api.airtable.com/v0/app0NITiJOMkdsr7k/tblq2FbjhoVHW96pM?fields[]=ClientName',
         { headers: { Authorization: 'Bearer patWffLOnbunOhwvC.553c4058fa5397af57a7646c0a8c76e179bba649c16f16e847fc68646a51001b' } }
       );
       const data = await res.json();
       clientNames = data.records
-        .map(r => r.fields['Client Name'])
+        .map(r => r.fields['ClientName'])
         .filter(Boolean)
         .sort();
     } catch (err) {
@@ -768,11 +768,11 @@
     input.disabled = true;
     try {
       const res = await fetch(
-        'https://api.airtable.com/v0/app0NITiJOMkdsr7k/tblq2FbjhoVHW96pM?fields[]=Client%20Name',
+        'https://api.airtable.com/v0/app0NITiJOMkdsr7k/tblq2FbjhoVHW96pM?fields[]=ClientName',
         { headers: { Authorization: 'Bearer patWffLOnbunOhwvC.553c4058fa5397af57a7646c0a8c76e179bba649c16f16e847fc68646a51001b' } }
       );
       const data = await res.json();
-      clientNames = data.records.map(r => r.fields['Client Name']).filter(Boolean).sort();
+      clientNames = data.records.map(r => r.fields['ClientName']).filter(Boolean).sort();
     } catch {}
     input.placeholder = 'Search client...';
     input.disabled = false;
@@ -1251,7 +1251,7 @@
 
     tbody.innerHTML = records.map(r => {
       const f = r.fields;
-      const name     = f['Client Name'] || '—';
+      const name     = f['ClientName'] || '—';
       const caseName = f['Case Name']   || '—';
       const lawyer   = f['Lawyer']      || '—';
       const status   = f['Status']      || '—';
@@ -1364,7 +1364,7 @@
     const filtered = allClients.filter(r => {
       const f = r.fields;
       const matchSearch = !search ||
-        (f['Client Name'] || '').toLowerCase().includes(search) ||
+        (f['ClientName'] || '').toLowerCase().includes(search) ||
         (f['Case Name']   || '').toLowerCase().includes(search) ||
         (f['Lawyer']      || '').toLowerCase().includes(search);
       const matchStatus = !status || (f['Status'] || '') === status;
