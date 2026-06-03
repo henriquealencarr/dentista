@@ -355,6 +355,7 @@
   const SUPABASE_URL  = 'https://emzovjkimtwpebbyujvd.supabase.co';
   const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtem92amtpbXR3cGViYnl1anZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NjUxNTYsImV4cCI6MjA5NDU0MTE1Nn0.KydYgZbQOBjaT7dIMVz7eVW1dwmOKM-xjxTePGFYEpk';
   const N8N_WEBHOOK        = 'https://n8n.srv1497968.hstgr.cloud/webhook/7a0384de-70be-4b01-9141-977ba6f274d9';
+  const N8N_EDITAR_WEBHOOK = 'https://n8n.srv1497968.hstgr.cloud/webhook/alterar-dados';
   const N8N_UPLOAD_WEBHOOK = 'https://n8n.srv1497968.hstgr.cloud/webhook/upload-image_mesmofluxo';
   const SESSION_ID    = '259d294ef1a04bea8725443d18dd6147';
 
@@ -1223,7 +1224,7 @@
     };
 
     try {
-      const res = await fetch(N8N_WEBHOOK, {
+      const res = await fetch(N8N_EDITAR_WEBHOOK, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
