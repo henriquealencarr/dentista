@@ -322,25 +322,42 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 20px;
-    height: 46px;
-    background: #ffffff;
+    padding: 0 24px;
+    height: 80px;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #e8f0f7;
+    background-image: url(''); /* coloque a URL da imagem aqui */
+    background-size: cover;
+    background-position: center;
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
     z-index: 100;
+    position: relative;
+  }
+  .top-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.1) 60%, transparent 100%);
+    pointer-events: none;
   }
   .top-header-logo {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 700;
     color: var(--text);
+    position: relative;
+    z-index: 1;
   }
   .top-header-actions {
     display: flex;
     align-items: center;
     gap: 8px;
+    position: relative;
+    z-index: 1;
   }
   .btn-header {
     padding: 6px 14px;
