@@ -486,7 +486,7 @@
           </tr>
         </thead>
         <tbody id="clientsTableBody">
-          <tr><td colspan="6" class="table-loading">Carregando clientes...</td></tr>
+          <tr><td colspan="7" class="table-loading">Carregando clientes...</td></tr>
         </tbody>
       </table>
     </div>
@@ -1206,7 +1206,7 @@
   // ── LOAD CLIENTS TABLE ────────────────────────────────────
   async function loadClientsTable() {
     const tbody = document.getElementById('clientsTableBody');
-    tbody.innerHTML = '<tr><td colspan="6" class="table-loading">Carregando clientes...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" class="table-loading">Carregando clientes...</td></tr>';
     document.getElementById('clientsCount').textContent = 'Carregando...';
     allClients = [];
 
@@ -1214,18 +1214,17 @@
     try {
       do {
         const url = new URL(`https://api.airtable.com/v0/${AIRTABLE_BASE}/${AIRTABLE_TABLE}`);
-        url.searchParams.set('fields[]', 'Client Name');
-        url.searchParams.append('fields[]', 'Case Name');
-        url.searchParams.append('fields[]', 'Lawyer');
-        url.searchParams.append('fields[]', 'Status');
-        url.searchParams.append('fields[]', 'Deadline');
-        url.searchParams.append('fields[]', 'Phone');
-        url.searchParams.append('fields[]', 'Image');
         url.searchParams.set('pageSize', '100');
         if (offset) url.searchParams.set('offset', offset);
 
         const res  = await fetch(url.toString(), { headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` } });
         const data = await res.json();
+
+        if (!res.ok) {
+          const msg = data?.error?.message || res.statusText;
+          throw new Error(`Airtable ${res.status}: ${msg}`);
+        }
+
         allClients.push(...(data.records || []));
         offset = data.offset || '';
       } while (offset);
@@ -1233,7 +1232,8 @@
       renderClientsTable(allClients);
       buildFreshImageMap();
     } catch(e) {
-      tbody.innerHTML = `<tr><td colspan="6" class="table-loading">Erro ao carregar dados.</td></tr>`;
+      console.error('[Airtable]', e);
+      tbody.innerHTML = `<tr><td colspan="7" class="table-loading">Erro: ${e.message}</td></tr>`;
       document.getElementById('clientsCount').textContent = 'Erro';
     }
   }
