@@ -1206,7 +1206,9 @@
 
   window.addEventListener('DOMContentLoaded', () => {
     loadClientsTable();
-    loadDocumentsPanel(); // pre-load docs so the button knows which patients have documents
+    loadDocumentsPanel().then(() => {
+      if (allClients.length > 0) renderClientsTable(allClients);
+    });
   });
 
   // ── LOAD CLIENTS TABLE ────────────────────────────────────
