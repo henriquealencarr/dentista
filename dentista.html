@@ -127,6 +127,7 @@
               <th>Lawyer</th>
               <th style="width:120px;">Status</th>
               <th style="width:130px;">Deadline</th>
+              <th style="width:80px;text-align:center;">Imagem</th>
             </tr>
           </thead>
           <tbody>
@@ -143,6 +144,15 @@
                 </select>
               </td>
               <td><input class="ef-input" id="ef-deadline" type="date" /></td>
+              <td style="text-align:center;padding:6px;">
+                <input type="file" id="ef-image" accept="image/*" style="display:none;" onchange="handleEditarImageSelect(event)" />
+                <label for="ef-image" id="ef-image-btn" style="cursor:pointer;display:inline-flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--accent);" title="Selecionar foto">
+                  <img id="ef-image-preview" src="" style="display:none;width:30px;height:30px;border-radius:50%;object-fit:cover;" />
+                  <span id="ef-image-icon" style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border:1.5px dashed #a5c0e8;border-radius:50%;background:#f0f4ff;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  </span>
+                </label>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -1148,6 +1158,30 @@
   // ── EDITAR PANEL FORM ─────────────────────────────────────
   let editarMode = 'add';
   let editarSelectedClient = '';
+  let editarImageFile = null;
+
+  function handleEditarImageSelect(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { showToast('Imagem muito grande — máx 5MB', false); return; }
+    editarImageFile = file;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const preview = document.getElementById('ef-image-preview');
+      preview.src = ev.target.result;
+      preview.style.display = 'block';
+      document.getElementById('ef-image-icon').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function clearEditarImage() {
+    editarImageFile = null;
+    document.getElementById('ef-image').value = '';
+    document.getElementById('ef-image-preview').src = '';
+    document.getElementById('ef-image-preview').style.display = 'none';
+    document.getElementById('ef-image-icon').style.display = 'inline-flex';
+  }
 
   function setEditarMode(mode) {
     editarMode = mode;
@@ -1166,6 +1200,7 @@
     });
     document.getElementById('ef-status').value = 'Todo';
     editarSelectedClient = '';
+    clearEditarImage();
     document.getElementById('editarStatusMsg').style.display = 'none';
     if (editarMode === 'edit') document.getElementById('editarClientInput').value = '';
   }
@@ -1237,6 +1272,15 @@
         body: JSON.stringify(payload)
       });
       if (!res.ok) throw new Error(`Status ${res.status}`);
+
+      // Upload image if selected
+      if (editarImageFile) {
+        const formData = new FormData();
+        formData.append('clientName', name);
+        formData.append('file', editarImageFile, editarImageFile.name);
+        await fetch(N8N_UPLOAD_WEBHOOK, { method: 'POST', body: formData }).catch(() => {});
+        clearEditarImage();
+      }
 
       const label = editarMode === 'add' ? 'adicionado' : 'atualizado';
       const msg = document.getElementById('editarStatusMsg');
