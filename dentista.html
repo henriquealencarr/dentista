@@ -1272,11 +1272,12 @@
       formData.append('currentProntuarioUrl', currentProntuarioUrl || '');
       if (editarImageFile) {
         formData.append('file', editarImageFile, editarImageFile.name);
-        clearEditarImage();
       }
 
       const res = await fetch(N8N_EDITAR_WEBHOOK, { method: 'POST', body: formData });
       if (!res.ok) throw new Error(`Status ${res.status}`);
+
+      if (editarImageFile) clearEditarImage();
 
       const label = editarMode === 'add' ? 'adicionado' : 'atualizado';
       const msg = document.getElementById('editarStatusMsg');
