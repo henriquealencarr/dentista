@@ -91,7 +91,19 @@
   </div>
 
   <!-- Sub-painel: Editar -->
-  <div id="sub-editar" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
+  <div id="sub-editar" style="display:none; flex-direction:column; flex:1; overflow:hidden; position:relative;">
+
+    <!-- Balão de boas-vindas -->
+    <div id="editarTooltip" onclick="dismissEditarTooltip(event)" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:1000; background:rgba(15,23,42,0.35); backdrop-filter:blur(2px); align-items:center; justify-content:center;">
+      <div style="background:#fff; border-radius:16px; box-shadow:0 8px 32px rgba(15,23,42,0.18); padding:28px 32px; max-width:340px; width:90%; position:relative; text-align:center;">
+        <div style="width:44px; height:44px; background:linear-gradient(135deg,#1e3a5f,#2d6a9f); border-radius:12px; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="22" height="22"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </div>
+        <div style="font-size:15px; font-weight:700; color:#1e3a5f; margin-bottom:8px;">Edição direta no Airtable</div>
+        <div style="font-size:13px; color:#64748b; line-height:1.6;">Preencha os campos abaixo e clique em <strong>Adicionar</strong> ou <strong>Atualizar</strong>. As alterações são salvas automaticamente no Airtable.</div>
+        <div style="margin-top:20px; font-size:11px; color:#94a3b8;">Clique em qualquer lugar para fechar</div>
+      </div>
+    </div>
 
     <!-- Mode toggle -->
     <div class="editar-mode-bar">
@@ -638,6 +650,8 @@
       if (!res.ok) throw new Error(`Status ${res.status}`);
 
       showToast(`Foto atualizada para ${clientName}!`, true);
+      lastUploadedClient = clientName;
+      setTimeout(() => { if (lastUploadedClient === clientName) lastUploadedClient = null; }, 30000);
       closeModal();
       setTimeout(() => loadClientsTable(), 1500);
     } catch (err) {
@@ -888,6 +902,7 @@
   let allClients = [];
   let freshImageMap = {};
   let clientDocUrls = {}; // name → Airtable PDF url
+  let lastUploadedClient = null;
 
   // ── DOC MODAL ─────────────────────────────────────────────
   let currentDocModalName = '';
@@ -941,32 +956,42 @@
   }
 
   function tryFreshImage(imgEl, expiredUrl) {
-    const match = expiredUrl.match(/\/(att\w+)\//);
-    if (match) {
-      const freshUrl = freshImageMap[match[1]];
-      if (freshUrl) {
+    if (imgEl._retryScheduled) return;
+    imgEl._retryScheduled = true;
+
+    let attempts = 0;
+
+    function attempt() {
+      attempts++;
+
+      // Try old attXXX URL format
+      const match = expiredUrl.match(/\/(att\w+)\//);
+      if (match && freshImageMap[match[1]]) {
         imgEl.onerror = null;
-        imgEl.src = freshUrl;
+        imgEl.src = freshImageMap[match[1]];
         return;
       }
-      // URL nova ainda não está no mapa — aguarda loadClientsTable() e tenta novamente
-      if (!imgEl._retryScheduled) {
-        imgEl._retryScheduled = true;
-        setTimeout(() => {
-          const retryUrl = freshImageMap[match[1]];
-          if (retryUrl) {
-            imgEl.onerror = null;
-            imgEl.src = retryUrl;
-          } else {
-            const escaped = expiredUrl.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-            imgEl.outerHTML = `<a href="${escaped}" target="_blank" rel="noopener">🔗 View link</a>`;
-          }
-        }, 3000);
-        return;
+
+      // Try lastUploadedClient lookup (handles new v5 URL format)
+      if (lastUploadedClient) {
+        const record = allClients.find(r => r.fields['ClientName'] === lastUploadedClient);
+        const url = record?.fields['Image']?.[0]?.url;
+        if (url) {
+          imgEl.onerror = null;
+          imgEl.src = url;
+          return;
+        }
+      }
+
+      if (attempts < 3) {
+        setTimeout(attempt, 2000);
+      } else if (imgEl.isConnected) {
+        const escaped = expiredUrl.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        imgEl.outerHTML = `<a href="${escaped}" target="_blank" rel="noopener">🔗 View link</a>`;
       }
     }
-    const escaped = expiredUrl.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    imgEl.outerHTML = `<a href="${escaped}" target="_blank" rel="noopener">🔗 View link</a>`;
+
+    attempt();
   }
 
   // ── TAB SWITCHING ─────────────────────────────────────────
@@ -1096,6 +1121,14 @@
     document.getElementById('ptab-editar').classList.toggle('active',     tab === 'editar');
     document.getElementById('ptab-documentos').classList.toggle('active', tab === 'documentos');
     if (tab === 'documentos') loadDocumentsPanel();
+    if (tab === 'editar') {
+      const tip = document.getElementById('editarTooltip');
+      tip.style.display = 'flex';
+    }
+  }
+
+  function dismissEditarTooltip(e) {
+    document.getElementById('editarTooltip').style.display = 'none';
   }
 
   // ── DOCUMENTS PANEL ───────────────────────────────────────
@@ -1321,6 +1354,8 @@
       msg.textContent = `✓ Paciente ${label} com sucesso!`;
       msg.style.display = 'block';
       showToast(`Paciente ${label}!`, true);
+      lastUploadedClient = name;
+      setTimeout(() => { if (lastUploadedClient === name) lastUploadedClient = null; }, 30000);
       if (editarMode === 'add') clearEditarForm();
       setTimeout(() => loadClientsTable(), 1500);
       setTimeout(() => { msg.style.display = 'none'; }, 4000);
