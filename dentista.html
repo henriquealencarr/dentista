@@ -638,6 +638,8 @@
       if (!res.ok) throw new Error(`Status ${res.status}`);
 
       showToast(`Foto atualizada para ${clientName}!`, true);
+      lastUploadedClient = clientName;
+      setTimeout(() => { if (lastUploadedClient === clientName) lastUploadedClient = null; }, 30000);
       closeModal();
       setTimeout(() => loadClientsTable(), 1500);
     } catch (err) {
@@ -888,6 +890,8 @@
   let allClients = [];
   let freshImageMap = {};
   let clientDocUrls = {}; // name → Airtable PDF url
+  let pendingFreshImages = [];
+  let lastUploadedClient = null;
 
   // ── DOC MODAL ─────────────────────────────────────────────
   let currentDocModalName = '';
@@ -938,35 +942,69 @@
         });
       }
     });
+    flushPendingImages();
+  }
+
+  function flushPendingImages() {
+    if (!pendingFreshImages.length) return;
+    let freshUrl = null;
+    if (lastUploadedClient) {
+      const record = allClients.find(r => r.fields['ClientName'] === lastUploadedClient);
+      freshUrl = record?.fields['Image']?.[0]?.url || null;
+    }
+    const toFlush = [...pendingFreshImages];
+    pendingFreshImages = [];
+    toFlush.forEach(imgEl => {
+      if (!imgEl.isConnected) return;
+      if (freshUrl) {
+        imgEl.onerror = null;
+        imgEl.src = freshUrl;
+      } else {
+        const src = imgEl.dataset.originalSrc || imgEl.src;
+        const escaped = src.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        imgEl.outerHTML = `<a href="${escaped}" target="_blank" rel="noopener">🔗 View link</a>`;
+      }
+    });
   }
 
   function tryFreshImage(imgEl, expiredUrl) {
+    if (imgEl._retryScheduled) return;
+
+    // Try old attXXX format first
     const match = expiredUrl.match(/\/(att\w+)\//);
-    if (match) {
-      const freshUrl = freshImageMap[match[1]];
-      if (freshUrl) {
+    if (match && freshImageMap[match[1]]) {
+      imgEl.onerror = null;
+      imgEl.src = freshImageMap[match[1]];
+      return;
+    }
+
+    // Try direct lookup via lastUploadedClient (handles new v5 URL format)
+    if (lastUploadedClient) {
+      const record = allClients.find(r => r.fields['ClientName'] === lastUploadedClient);
+      const freshUrl = record?.fields['Image']?.[0]?.url;
+      if (freshUrl && freshUrl !== expiredUrl) {
         imgEl.onerror = null;
         imgEl.src = freshUrl;
         return;
       }
-      // URL nova ainda não está no mapa — aguarda loadClientsTable() e tenta novamente
-      if (!imgEl._retryScheduled) {
-        imgEl._retryScheduled = true;
-        setTimeout(() => {
-          const retryUrl = freshImageMap[match[1]];
-          if (retryUrl) {
-            imgEl.onerror = null;
-            imgEl.src = retryUrl;
-          } else {
-            const escaped = expiredUrl.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-            imgEl.outerHTML = `<a href="${escaped}" target="_blank" rel="noopener">🔗 View link</a>`;
-          }
-        }, 3000);
-        return;
-      }
     }
-    const escaped = expiredUrl.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    imgEl.outerHTML = `<a href="${escaped}" target="_blank" rel="noopener">🔗 View link</a>`;
+
+    // Queue for retry when allClients refreshes after upload
+    imgEl._retryScheduled = true;
+    imgEl.dataset.originalSrc = expiredUrl;
+    pendingFreshImages.push(imgEl);
+
+    // Safety fallback: show link after 8s if no refresh arrived
+    setTimeout(() => {
+      const idx = pendingFreshImages.indexOf(imgEl);
+      if (idx !== -1) {
+        pendingFreshImages.splice(idx, 1);
+        if (imgEl.isConnected) {
+          const escaped = expiredUrl.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+          imgEl.outerHTML = `<a href="${escaped}" target="_blank" rel="noopener">🔗 View link</a>`;
+        }
+      }
+    }, 8000);
   }
 
   // ── TAB SWITCHING ─────────────────────────────────────────
@@ -1321,6 +1359,8 @@
       msg.textContent = `✓ Paciente ${label} com sucesso!`;
       msg.style.display = 'block';
       showToast(`Paciente ${label}!`, true);
+      lastUploadedClient = name;
+      setTimeout(() => { if (lastUploadedClient === name) lastUploadedClient = null; }, 30000);
       if (editarMode === 'add') clearEditarForm();
       setTimeout(() => loadClientsTable(), 1500);
       setTimeout(() => { msg.style.display = 'none'; }, 4000);
