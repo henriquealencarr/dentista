@@ -890,7 +890,6 @@
   let allClients = [];
   let freshImageMap = {};
   let clientDocUrls = {}; // name → Airtable PDF url
-  let pendingFreshImages = [];
   let lastUploadedClient = null;
 
   // ── DOC MODAL ─────────────────────────────────────────────
@@ -942,69 +941,45 @@
         });
       }
     });
-    flushPendingImages();
-  }
-
-  function flushPendingImages() {
-    if (!pendingFreshImages.length) return;
-    let freshUrl = null;
-    if (lastUploadedClient) {
-      const record = allClients.find(r => r.fields['ClientName'] === lastUploadedClient);
-      freshUrl = record?.fields['Image']?.[0]?.url || null;
-    }
-    const toFlush = [...pendingFreshImages];
-    pendingFreshImages = [];
-    toFlush.forEach(imgEl => {
-      if (!imgEl.isConnected) return;
-      if (freshUrl) {
-        imgEl.onerror = null;
-        imgEl.src = freshUrl;
-      } else {
-        const src = imgEl.dataset.originalSrc || imgEl.src;
-        const escaped = src.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-        imgEl.outerHTML = `<a href="${escaped}" target="_blank" rel="noopener">🔗 View link</a>`;
-      }
-    });
   }
 
   function tryFreshImage(imgEl, expiredUrl) {
     if (imgEl._retryScheduled) return;
+    imgEl._retryScheduled = true;
 
-    // Try old attXXX format first
-    const match = expiredUrl.match(/\/(att\w+)\//);
-    if (match && freshImageMap[match[1]]) {
-      imgEl.onerror = null;
-      imgEl.src = freshImageMap[match[1]];
-      return;
-    }
+    let attempts = 0;
 
-    // Try direct lookup via lastUploadedClient (handles new v5 URL format)
-    if (lastUploadedClient) {
-      const record = allClients.find(r => r.fields['ClientName'] === lastUploadedClient);
-      const freshUrl = record?.fields['Image']?.[0]?.url;
-      if (freshUrl && freshUrl !== expiredUrl) {
+    function attempt() {
+      attempts++;
+
+      // Try old attXXX URL format
+      const match = expiredUrl.match(/\/(att\w+)\//);
+      if (match && freshImageMap[match[1]]) {
         imgEl.onerror = null;
-        imgEl.src = freshUrl;
+        imgEl.src = freshImageMap[match[1]];
         return;
       }
-    }
 
-    // Queue for retry when allClients refreshes after upload
-    imgEl._retryScheduled = true;
-    imgEl.dataset.originalSrc = expiredUrl;
-    pendingFreshImages.push(imgEl);
-
-    // Safety fallback: show link after 8s if no refresh arrived
-    setTimeout(() => {
-      const idx = pendingFreshImages.indexOf(imgEl);
-      if (idx !== -1) {
-        pendingFreshImages.splice(idx, 1);
-        if (imgEl.isConnected) {
-          const escaped = expiredUrl.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-          imgEl.outerHTML = `<a href="${escaped}" target="_blank" rel="noopener">🔗 View link</a>`;
+      // Try lastUploadedClient lookup (handles new v5 URL format)
+      if (lastUploadedClient) {
+        const record = allClients.find(r => r.fields['ClientName'] === lastUploadedClient);
+        const url = record?.fields['Image']?.[0]?.url;
+        if (url) {
+          imgEl.onerror = null;
+          imgEl.src = url;
+          return;
         }
       }
-    }, 8000);
+
+      if (attempts < 3) {
+        setTimeout(attempt, 2000);
+      } else if (imgEl.isConnected) {
+        const escaped = expiredUrl.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        imgEl.outerHTML = `<a href="${escaped}" target="_blank" rel="noopener">🔗 View link</a>`;
+      }
+    }
+
+    attempt();
   }
 
   // ── TAB SWITCHING ─────────────────────────────────────────
