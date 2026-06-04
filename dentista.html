@@ -621,6 +621,11 @@
       formData.append('action',               'editImage');
       formData.append('sessionId',            SESSION_ID);
       formData.append('clientName',           clientName);
+      formData.append('phone',                record?.fields['Phone']      || '');
+      formData.append('caseName',             record?.fields['Case Name']  || '');
+      formData.append('lawyer',               record?.fields['Lawyer']     || '');
+      formData.append('status',               record?.fields['Status']     || '');
+      formData.append('deadline',             record?.fields['Deadline']   || '');
       formData.append('currentImageUrl',      currentImageUrl);
       formData.append('currentProntuarioUrl', currentProntuarioUrl);
       formData.append('file', selectedFile, selectedFile.name);
