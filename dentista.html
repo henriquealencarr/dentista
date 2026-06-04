@@ -612,19 +612,28 @@
     spinner.classList.add('visible');
 
     try {
+      const record = allClients.find(r => r.fields['ClientName'] === clientName);
+      const currentImageUrl      = record?.fields['Image']?.[0]?.url      || '';
+      const currentProntuarioUrl = record?.fields['Prontuario']?.[0]?.url || '';
+
       const formData = new FormData();
-      formData.append('clientName', clientName);
+      formData.append('action',               'editImage');
+      formData.append('sessionId',            SESSION_ID);
+      formData.append('clientName',           clientName);
+      formData.append('currentImageUrl',      currentImageUrl);
+      formData.append('currentProntuarioUrl', currentProntuarioUrl);
       formData.append('file', selectedFile, selectedFile.name);
 
-      const res = await fetch(N8N_UPLOAD_WEBHOOK, {
+      const res = await fetch(N8N_EDITAR_WEBHOOK, {
         method: 'POST',
         body: formData
       });
 
       if (!res.ok) throw new Error(`Status ${res.status}`);
 
-      showToast(`Photo updated for ${clientName}!`, true);
+      showToast(`Foto atualizada para ${clientName}!`, true);
       closeModal();
+      setTimeout(() => loadClientsTable(), 1500);
     } catch (err) {
       console.error('[uploadImage]', err);
       showToast('Upload failed: ' + err.message, false);
