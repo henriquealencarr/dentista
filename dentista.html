@@ -941,8 +941,6 @@
   }
 
   function tryFreshImage(imgEl, expiredUrl) {
-    // Extrai o ID do anexo da URL do Airtable
-    // Formato: https://v5.airtableusercontent.com/v3/u/XX/XX/TIMESTAMP/att.../
     const match = expiredUrl.match(/\/(att\w+)\//);
     if (match) {
       const freshUrl = freshImageMap[match[1]];
@@ -951,8 +949,22 @@
         imgEl.src = freshUrl;
         return;
       }
+      // URL nova ainda não está no mapa — aguarda loadClientsTable() e tenta novamente
+      if (!imgEl._retryScheduled) {
+        imgEl._retryScheduled = true;
+        setTimeout(() => {
+          const retryUrl = freshImageMap[match[1]];
+          if (retryUrl) {
+            imgEl.onerror = null;
+            imgEl.src = retryUrl;
+          } else {
+            const escaped = expiredUrl.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            imgEl.outerHTML = `<a href="${escaped}" target="_blank" rel="noopener">🔗 View link</a>`;
+          }
+        }, 3000);
+        return;
+      }
     }
-    // Fallback: mostra link
     const escaped = expiredUrl.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     imgEl.outerHTML = `<a href="${escaped}" target="_blank" rel="noopener">🔗 View link</a>`;
   }
