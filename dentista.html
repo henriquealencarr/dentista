@@ -1259,42 +1259,23 @@
     const currentProntuarioUrl = record?.fields['Prontuario']?.[0]?.url || null;
 
     try {
-      // Se tiver imagem, manda tudo como FormData numa só requisição
-      let res;
+      const formData = new FormData();
+      formData.append('action',               editarMode);
+      formData.append('sessionId',            SESSION_ID);
+      formData.append('clientName',           name);
+      formData.append('phone',                document.getElementById('ef-phone').value.trim());
+      formData.append('caseName',             document.getElementById('ef-case').value.trim());
+      formData.append('lawyer',               document.getElementById('ef-lawyer').value.trim());
+      formData.append('status',               document.getElementById('ef-status').value);
+      formData.append('deadline',             document.getElementById('ef-deadline').value);
+      formData.append('currentImageUrl',      currentImageUrl      || '');
+      formData.append('currentProntuarioUrl', currentProntuarioUrl || '');
       if (editarImageFile) {
-        const formData = new FormData();
-        formData.append('action',               editarMode);
-        formData.append('sessionId',            SESSION_ID);
-        formData.append('clientName',           name);
-        formData.append('phone',                document.getElementById('ef-phone').value.trim());
-        formData.append('caseName',             document.getElementById('ef-case').value.trim());
-        formData.append('lawyer',               document.getElementById('ef-lawyer').value.trim());
-        formData.append('status',               document.getElementById('ef-status').value);
-        formData.append('deadline',             document.getElementById('ef-deadline').value);
-        formData.append('currentImageUrl',      currentImageUrl      || '');
-        formData.append('currentProntuarioUrl', currentProntuarioUrl || '');
         formData.append('file', editarImageFile, editarImageFile.name);
-        res = await fetch(N8N_EDITAR_WEBHOOK, { method: 'POST', body: formData });
         clearEditarImage();
-      } else {
-        const payload = {
-          action:               editarMode,
-          sessionId:            SESSION_ID,
-          clientName:           name,
-          phone:                document.getElementById('ef-phone').value.trim(),
-          caseName:             document.getElementById('ef-case').value.trim(),
-          lawyer:               document.getElementById('ef-lawyer').value.trim(),
-          status:               document.getElementById('ef-status').value,
-          deadline:             document.getElementById('ef-deadline').value,
-          currentImageUrl:      currentImageUrl,
-          currentProntuarioUrl: currentProntuarioUrl
-        };
-        res = await fetch(N8N_EDITAR_WEBHOOK, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
       }
+
+      const res = await fetch(N8N_EDITAR_WEBHOOK, { method: 'POST', body: formData });
       if (!res.ok) throw new Error(`Status ${res.status}`);
 
       const label = editarMode === 'add' ? 'adicionado' : 'atualizado';
