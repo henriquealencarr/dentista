@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Assistente Dental</title>
+  <title>Real Estate Assistant</title>
   <link rel="stylesheet" href="chatadvogado.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
@@ -12,9 +12,9 @@
 
 <header class="top-header">
   <div class="top-header-logo">
-    <div class="avatar" style="width:38px;height:38px;font-size:18px;">🦷</div>
+    <div class="avatar" style="width:38px;height:38px;font-size:18px;">🏠</div>
     <div class="header-info">
-      <h1 style="font-size:20px;font-weight:700;">Assistente Dental</h1>
+      <h1 style="font-size:20px;font-weight:700;">Real Estate Assistant</h1>
     </div>
   </div>
   <div class="top-header-actions">
@@ -35,7 +35,7 @@
     <div class="panel-tabs">
       <button class="panel-tab active" id="ptab-clientes" onclick="switchPanelTab('clientes')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        Pacientes
+        Clients
       </button>
       <button class="panel-tab" id="ptab-editar" onclick="switchPanelTab('editar')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -53,7 +53,7 @@
     <div class="clients-toolbar">
       <div class="clients-search-wrap">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="clientSearch" placeholder="Buscar por nome, tratamento ou dentista..." oninput="filterClients()" />
+        <input type="text" id="clientSearch" placeholder="Search by name, property or agent..." oninput="filterClients()" />
       </div>
       <div class="select-wrap">
         <select id="statusFilter" onchange="filterClients()" onfocus="this.parentElement.classList.add('open')" onblur="this.parentElement.classList.remove('open')">
@@ -68,23 +68,23 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       </button>
     </div>
-    <div class="clients-count" id="clientsCount">Carregando...</div>
+    <div class="clients-count" id="clientsCount">Loading...</div>
     <div class="table-wrap">
       <table class="clients-table">
         <thead>
           <tr>
             <th>Foto</th>
-            <th>Paciente</th>
-            <th>Tratamento</th>
-            <th>Dentista</th>
+            <th>Client</th>
+            <th>Property</th>
+            <th>Agent</th>
             <th>Status</th>
-            <th>Consulta</th>
+            <th>Closing Date</th>
             <th>Telefone</th>
             <th style="text-align:center;">Documentos</th>
           </tr>
         </thead>
         <tbody id="clientsTableBody">
-          <tr><td colspan="8" class="table-loading">Carregando clientes...</td></tr>
+          <tr><td colspan="8" class="table-loading">Loading clients...</td></tr>
         </tbody>
       </table>
     </div>
@@ -96,8 +96,8 @@
     <!-- Balão estilo HQ -->
     <div id="editarTooltip" onclick="dismissEditarTooltip(event)" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:1000; align-items:flex-start; justify-content:flex-start; padding:65px 0 0 520px;">
       <div style="position:relative; background:#fff; border:2.5px solid #1e3a5f; border-radius:14px; padding:15px 20px; max-width:270px; text-align:center; box-shadow:3px 3px 0 rgba(30,58,95,0.15); pointer-events:none;">
-        <div style="font-size:12px; color:#475569; line-height:1.55;">Preencha os campos na tabela abaixo para adicionar ou atualizar dados. As mudanças são enviadas automaticamente</div>
-        <div style="font-size:10px; color:#94a3b8; margin-top:10px;">Clique em qualquer lugar para fechar</div>
+        <div style="font-size:12px; color:#475569; line-height:1.55;">Fill in the fields below to add or update records. Changes are sent automatically</div>
+        <div style="font-size:10px; color:#94a3b8; margin-top:10px;">Click anywhere to close</div>
         <!-- ponta do balão (borda) — aponta para botão de imagem (baixo-direita) -->
         <div style="position:absolute; bottom:-14px; right:22px; width:0; height:0; border-left:11px solid transparent; border-right:11px solid transparent; border-top:13px solid #1e3a5f;"></div>
         <!-- ponta do balão (preenchimento) -->
@@ -109,11 +109,11 @@
     <div class="editar-mode-bar">
       <button class="editar-mode-btn active" id="editarModeAdd" onclick="setEditarMode('add')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Novo Paciente
+        New Client
       </button>
       <button class="editar-mode-btn" id="editarModeEdit" onclick="setEditarMode('edit')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        Editar Existente
+        Edit Existing
       </button>
     </div>
 
@@ -121,7 +121,7 @@
     <div id="editarPickerRow" style="display:none; padding:8px 14px; border-bottom:1px solid var(--border); background:#fff; flex-shrink:0;">
       <div class="clients-search-wrap client-search-wrap" id="editarClientSearchWrap">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="editarClientInput" placeholder="Buscar paciente para editar..."
+        <input type="text" id="editarClientInput" placeholder="Search client to edit..."
           autocomplete="off" oninput="filterEditarDropdown()" onfocus="openEditarDropdown()"
           style="flex:1;border:none;background:transparent;font-size:13px;font-family:inherit;color:var(--text);outline:none;" />
         <div class="client-dropdown" id="editarClientDropdown"></div>
@@ -136,19 +136,20 @@
             <tr>
               <th>ClientName</th>
               <th>Phone</th>
-              <th>Case Name</th>
-              <th>Lawyer</th>
+              <th>Property</th>
+              <th>Agent</th>
               <th style="width:120px;">Status</th>
               <th style="width:130px;">Deadline</th>
               <th style="width:80px;text-align:center;">Imagem</th>
+              <th style="width:80px;text-align:center;">Document</th>
             </tr>
           </thead>
           <tbody>
             <tr class="editar-form-row">
-              <td><input class="ef-input" id="ef-name" type="text" placeholder="Nome completo..." /></td>
+              <td><input class="ef-input" id="ef-name" type="text" placeholder="Full name..." /></td>
               <td><input class="ef-input" id="ef-phone" type="tel" placeholder="Telefone..." /></td>
-              <td><input class="ef-input" id="ef-case" type="text" placeholder="Tratamento..." /></td>
-              <td><input class="ef-input" id="ef-lawyer" type="text" placeholder="Dentista..." /></td>
+              <td><input class="ef-input" id="ef-case" type="text" placeholder="Property type..." /></td>
+              <td><input class="ef-input" id="ef-lawyer" type="text" placeholder="Agent name..." /></td>
               <td>
                 <select class="ef-select" id="ef-status">
                   <option value="Todo">Todo</option>
@@ -166,6 +167,15 @@
                   </span>
                 </label>
               </td>
+              <td style="text-align:center;padding:6px;">
+                <input type="file" id="ef-pdf" accept="application/pdf" style="display:none;" onchange="handleEditarPdfSelect(event)" />
+                <label for="ef-pdf" id="ef-pdf-btn" style="cursor:pointer;display:inline-flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--accent);" title="Selecionar PDF">
+                  <span id="ef-pdf-icon" style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border:1.5px dashed #a5c0e8;border-radius:6px;background:#f0f4ff;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                  </span>
+                  <span id="ef-pdf-name" style="display:none;font-size:10px;color:#059669;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+                </label>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -175,7 +185,7 @@
         <span id="editarStatusMsg" style="display:none;font-size:13px;color:#059669;font-weight:500;flex:1;"></span>
         <button class="editar-clear-btn" onclick="clearEditarForm()">Limpar</button>
         <button class="editar-submit-btn" id="editarSubmitBtn" onclick="submitEditarForm()">
-          Adicionar Paciente →
+          Add Client →
         </button>
       </div>
     </div>
@@ -193,10 +203,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       </button>
     </div>
-    <div class="clients-count" id="docsCount">Carregando...</div>
+    <div class="clients-count" id="docsCount">Loading...</div>
     <div class="docs-list-wrap">
       <div class="docs-list" id="docsList">
-        <div class="docs-loading">Carregando documentos...</div>
+        <div class="docs-loading">Loading documents...</div>
       </div>
     </div>
   </div>
@@ -207,11 +217,14 @@
 
 <div id="panel-chat">
 <div class="floating-side-btns">
-  <button class="floating-side-btn" title="Ver pacientes" onclick="openSearchClientModal()">
+  <button class="floating-side-btn" title="View clients" onclick="openSearchClientModal()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
   </button>
   <button class="floating-side-btn" title="Upload client photo" onclick="openModal()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+  </button>
+  <button class="floating-side-btn" title="Upload document PDF" onclick="openProntuarioModal()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
   </button>
 </div>
 <div class="chat-container">
@@ -231,7 +244,7 @@
   </button>
   <button class="nav-tab" id="tab-clientes" onclick="switchTab('clientes')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-    Pacientes
+    Clients
   </button>
 </div>
 
@@ -241,8 +254,8 @@
         <path stroke-linecap="round" stroke-linejoin="round"
           d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 01-.923 1.785A5.969 5.969 0 006 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337z"/>
       </svg>
-      <h2>Nenhuma conversa ainda</h2>
-      <p>Digite sua primeira pergunta abaixo.</p>
+      <h2>No conversation yet</h2>
+      <p>Type your first question below.</p>
     </div>
   </div>
 
@@ -257,7 +270,7 @@
     <div class="input-wrapper">
       <textarea
         id="input"
-        placeholder="Digite sua pergunta odontológica..."
+        placeholder="Ask about properties, contracts, or clients..."
         rows="1"
         onkeydown="handleKey(event)"
         oninput="autoResize(this)"
@@ -278,9 +291,9 @@
 <!-- Search Client Modal -->
 <div class="modal-overlay" id="searchClientOverlay" onclick="handleSearchOverlayClick(event)">
   <div class="modal">
-    <h2>🔍 Buscar Paciente</h2>
+    <h2>🔍 Search Client</h2>
     <div>
-      <label>Nome do Paciente</label>
+      <label>Client Name</label>
       <div class="client-search-wrap" id="searchClientWrap">
         <input
           type="text"
@@ -297,7 +310,7 @@
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeSearchClientModal()">Cancel</button>
       <button class="btn-upload" id="searchClientBtn" onclick="sendClientSearch()" disabled>
-        Buscar Paciente
+        Search Client
       </button>
     </div>
   </div>
@@ -306,10 +319,10 @@
 <!-- Upload Modal -->
 <div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
   <div class="modal">
-    <h2>📷 Atualizar Foto do Paciente</h2>
+    <h2>📷 Update Client Photo</h2>
 
     <div>
-      <label>Nome do Paciente</label>
+      <label>Client Name</label>
       <div class="client-search-wrap" id="clientSearchWrap">
         <input
           type="text"
@@ -355,7 +368,7 @@
 <!-- Doc Options Modal -->
 <div class="modal-overlay" id="docModalOverlay" onclick="handleDocOverlayClick(event)">
   <div class="modal">
-    <h2>📄 Prontuário</h2>
+    <h2>📄 Document</h2>
     <p id="docModalPatientName" style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:20px;"></p>
     <div style="display:flex;flex-direction:column;gap:10px;">
       <button id="docDownloadBtn" onclick="downloadPatientDoc()" style="width:100%;padding:12px;border:none;border-radius:10px;background:var(--accent);color:white;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity 0.2s;">
@@ -364,11 +377,60 @@
       </button>
       <button onclick="resumePatientDoc()" style="width:100%;padding:12px;border:1px solid var(--border);border-radius:10px;background:white;color:var(--text);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.2s;" onmouseover="this.style.background='#f8fafd'" onmouseout="this.style.background='white'">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        Ver Resumo
+        View Summary
       </button>
     </div>
     <div class="modal-actions" style="margin-top:12px;">
-      <button class="btn-cancel" onclick="closeDocModal()">Cancelar</button>
+      <button class="btn-cancel" onclick="closeDocModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Document Upload Modal -->
+<div class="modal-overlay" id="documentModalOverlay" onclick="handleProntuarioOverlayClick(event)">
+  <div class="modal">
+    <h2>📄 Upload Document</h2>
+
+    <div>
+      <label>Client Name</label>
+      <div class="client-search-wrap" id="documentClientSearchWrap">
+        <input
+          type="text"
+          id="documentClientInput"
+          placeholder="Search client..."
+          autocomplete="off"
+          oninput="filterProntuarioDropdown()"
+          onfocus="openProntuarioDropdown()"
+          style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;color:var(--text);outline:none;background:white;transition:border-color 0.2s;box-sizing:border-box;"
+        />
+        <div class="client-dropdown" id="documentClientDropdown"></div>
+      </div>
+    </div>
+
+    <div>
+      <label>Arquivo PDF</label>
+      <div class="drop-zone" id="pdfDropZone">
+        <input type="file" id="pdfFileInput" accept="application/pdf" onchange="handlePdfFileSelect(event)" />
+        <div class="drop-zone-icon">📄</div>
+        <p><span>Clique para selecionar</span> ou arraste o PDF</p>
+        <p style="font-size:11px;margin-top:4px;">Somente PDF — máx 10MB</p>
+      </div>
+      <div class="preview-wrap" id="pdfPreviewWrap">
+        <div class="drop-zone-icon" style="font-size:28px;margin:0;">📄</div>
+        <div class="preview-info">
+          <div class="preview-name" id="pdfPreviewName"></div>
+          <div class="preview-size" id="pdfPreviewSize"></div>
+        </div>
+        <button class="remove-img" onclick="removePdf()" title="Remover">✕</button>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeProntuarioModal()">Cancel</button>
+      <button class="btn-upload" id="documentUploadBtn" onclick="uploadProntuario()" disabled>
+        <div class="spinner" id="documentSpinner"></div>
+        Upload PDF
+      </button>
     </div>
   </div>
 </div>
@@ -541,7 +603,7 @@
     if (!selectedSearchClient) return;
     const name = selectedSearchClient;
     closeSearchClientModal();
-    sendShortcut(`Mostre os dados do paciente ${name} no banco de dados`);
+    sendShortcut(`Show client data for ${name} no banco de dados`);
   }
 
   function openModal() {
@@ -602,7 +664,27 @@
 
   document.addEventListener('DOMContentLoaded', () => {
 
-    // Drag & drop
+    // Drag & drop PDF
+    const pdfDropZone = document.getElementById('pdfDropZone');
+    pdfDropZone.addEventListener('dragover', (e) => { e.preventDefault(); pdfDropZone.classList.add('dragover'); });
+    pdfDropZone.addEventListener('dragleave', () => pdfDropZone.classList.remove('dragover'));
+    pdfDropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      pdfDropZone.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type === 'application/pdf') setPdfFile(file);
+      else showToast('Apenas arquivos PDF são aceitos', false);
+    });
+
+    // Fechar dropdown prontuário ao clicar fora
+    document.addEventListener('click', (e) => {
+      const wrap4 = document.getElementById('documentClientSearchWrap');
+      if (wrap4 && !wrap4.contains(e.target)) {
+        document.getElementById('documentClientDropdown').classList.remove('open');
+      }
+    });
+
+    // Drag & drop imagem
     const dropZone = document.getElementById('dropZone');
     dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
     dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
@@ -1009,7 +1091,7 @@
   function summarizePatientDoc(name) {
     if (window.innerWidth < 768) switchTab('chat');
     const matchingDoc = allDocs.find(d => d.file_name.toLowerCase().includes(name.toLowerCase()));
-    const fileName = matchingDoc ? matchingDoc.file_name : name + '_prontuario.pdf';
+    const fileName = matchingDoc ? matchingDoc.file_name : name + '_document.pdf';
     sendShortcut(`Resuma o documento "${fileName}"`);
   }
 
@@ -1025,8 +1107,8 @@
   // ── LOAD CLIENTS TABLE ────────────────────────────────────
   async function loadClientsTable() {
     const tbody = document.getElementById('clientsTableBody');
-    tbody.innerHTML = '<tr><td colspan="8" class="table-loading">Carregando clientes...</td></tr>';
-    document.getElementById('clientsCount').textContent = 'Carregando...';
+    tbody.innerHTML = '<tr><td colspan="8" class="table-loading">Loading clients...</td></tr>';
+    document.getElementById('clientsCount').textContent = 'Loading...';
     allClients = [];
 
     let offset = '';
@@ -1061,7 +1143,7 @@
     const tbody = document.getElementById('clientsTableBody');
 
     if (records.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" class="table-loading">Nenhum paciente encontrado.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" class="table-loading">No clients found.</td></tr>';
       document.getElementById('clientsCount').textContent = '0 paciente(s) encontrado(s)';
       return;
     }
@@ -1138,8 +1220,8 @@
   async function loadDocumentsPanel(force = false) {
     if (docsLoaded && !force) return;
     const list = document.getElementById('docsList');
-    document.getElementById('docsCount').textContent = 'Carregando...';
-    list.innerHTML = '<div class="docs-loading">Carregando documentos...</div>';
+    document.getElementById('docsCount').textContent = 'Loading...';
+    list.innerHTML = '<div class="docs-loading">Loading documents...</div>';
     allDocs = [];
 
     try {
@@ -1177,7 +1259,7 @@
     list.innerHTML = docs.map(doc => {
       const safeName = doc.file_name.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
       const shortName = doc.file_name.replace(/\.pdf$/i, '');
-      const baseName = doc.file_name.replace(/_prontuario\.pdf$/i, '').replace(/\.pdf$/i, '');
+      const baseName = doc.file_name.replace(/_document\.pdf$/i, '').replace(/\.pdf$/i, '');
       const pdfUrl = clientDocUrls[baseName] || '';
       const downloadBtn = pdfUrl
         ? `<a href="${pdfUrl}" target="_blank" class="doc-card-btn" style="text-decoration:none;margin-right:6px;" title="Download PDF">
@@ -1225,7 +1307,143 @@
     renderClientsTable(filtered);
   }
 
-  // ── EDITAR PANEL FORM ─────────────────────────────────────
+  // ── PRONTUÁRIO PDF (modal flutuante) ──────────────────
+  let selectedProntuarioClient = '';
+  let selectedPdfFile = null;
+
+  function openProntuarioModal() {
+    selectedProntuarioClient = '';
+    selectedPdfFile = null;
+    document.getElementById('documentClientInput').value = '';
+    document.getElementById('documentClientDropdown').classList.remove('open');
+    document.getElementById('pdfDropZone').style.display = '';
+    document.getElementById('pdfPreviewWrap').classList.remove('visible');
+    document.getElementById('pdfFileInput').value = '';
+    document.getElementById('documentUploadBtn').disabled = true;
+    document.getElementById('documentModalOverlay').classList.add('visible');
+    if (clientNames.length === 0) loadClients();
+  }
+
+  function closeProntuarioModal() {
+    document.getElementById('documentModalOverlay').classList.remove('visible');
+  }
+
+  function handleProntuarioOverlayClick(e) {
+    if (e.target === document.getElementById('documentModalOverlay')) closeProntuarioModal();
+  }
+
+  function openProntuarioDropdown() {
+    filterProntuarioDropdown();
+    document.getElementById('documentClientDropdown').classList.add('open');
+  }
+
+  function filterProntuarioDropdown() {
+    const query    = document.getElementById('documentClientInput').value.toLowerCase();
+    const dropdown = document.getElementById('documentClientDropdown');
+    const filtered = clientNames.filter(n => n.toLowerCase().includes(query));
+    if (filtered.length === 0) {
+      dropdown.innerHTML = '<div class="client-dropdown-empty">No clients found</div>';
+    } else {
+      dropdown.innerHTML = filtered.map(name => {
+        const safe = name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        return `<div class="client-dropdown-item ${name === selectedProntuarioClient ? 'selected' : ''}" data-name="${safe}">${safe}</div>`;
+      }).join('');
+      dropdown.querySelectorAll('.client-dropdown-item').forEach(item => {
+        item.addEventListener('click', e => { e.stopPropagation(); selectProntuarioClient(item.dataset.name); });
+      });
+    }
+    dropdown.classList.add('open');
+  }
+
+  function selectProntuarioClient(name) {
+    selectedProntuarioClient = name;
+    document.getElementById('documentClientInput').value = name;
+    document.getElementById('documentClientDropdown').classList.remove('open');
+    checkProntuarioReady();
+  }
+
+  function handlePdfFileSelect(e) {
+    const file = e.target.files[0];
+    if (file) setPdfFile(file);
+  }
+
+  function setPdfFile(file) {
+    if (file.size > 10 * 1024 * 1024) { showToast('PDF muito grande — máx 10MB', false); return; }
+    selectedPdfFile = file;
+    document.getElementById('pdfPreviewName').textContent = file.name;
+    document.getElementById('pdfPreviewSize').textContent = (file.size / 1024).toFixed(1) + ' KB';
+    document.getElementById('pdfPreviewWrap').classList.add('visible');
+    document.getElementById('pdfDropZone').style.display = 'none';
+    checkProntuarioReady();
+  }
+
+  function removePdf() {
+    selectedPdfFile = null;
+    document.getElementById('pdfFileInput').value = '';
+    document.getElementById('pdfPreviewWrap').classList.remove('visible');
+    document.getElementById('pdfDropZone').style.display = '';
+    checkProntuarioReady();
+  }
+
+  function checkProntuarioReady() {
+    document.getElementById('documentUploadBtn').disabled = !(selectedProntuarioClient && selectedPdfFile);
+  }
+
+  async function uploadProntuario() {
+    if (!selectedProntuarioClient || !selectedPdfFile) return;
+    const btn     = document.getElementById('documentUploadBtn');
+    const spinner = document.getElementById('documentSpinner');
+    btn.disabled  = true;
+    spinner.classList.add('visible');
+    try {
+      const formData = new FormData();
+      formData.append('action',     'uploadProntuario');
+      formData.append('sessionId',  SESSION_ID);
+      formData.append('clientName', selectedProntuarioClient);
+      formData.append('file', selectedPdfFile, selectedPdfFile.name);
+
+      const res = await fetch(N8N_EDITAR_WEBHOOK, { method: 'POST', body: formData });
+      if (!res.ok) throw new Error(`Status ${res.status}`);
+
+      showToast(`Document enviado para ${selectedProntuarioClient}!`, true);
+      closeProntuarioModal();
+      setTimeout(() => loadClientsTable(), 2000);
+    } catch (err) {
+      showToast('Error uploading PDF: ' + err.message, false);
+    } finally {
+      btn.disabled = false;
+      spinner.classList.remove('visible');
+    }
+  }
+
+  // ── PRONTUÁRIO PDF (aba Editar) ────────────────────────
+  let editarPdfFile = null;
+
+  function handleEditarPdfSelect(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) { showToast('PDF muito grande — máx 10MB', false); return; }
+    editarPdfFile = file;
+    const nameEl = document.getElementById('ef-pdf-name');
+    const iconEl = document.getElementById('ef-pdf-icon');
+    nameEl.textContent = file.name.length > 10 ? file.name.substring(0, 10) + '…' : file.name;
+    nameEl.style.display = 'block';
+    iconEl.style.borderColor = '#059669';
+    iconEl.style.background  = '#f0fdf4';
+  }
+
+  function clearEditarPdf() {
+    editarPdfFile = null;
+    document.getElementById('ef-pdf').value = '';
+    const nameEl = document.getElementById('ef-pdf-name');
+    const iconEl = document.getElementById('ef-pdf-icon');
+    nameEl.style.display = 'none';
+    nameEl.textContent   = '';
+    iconEl.style.borderColor = '';
+    iconEl.style.background  = '';
+  }
+
+
   let editarMode = 'add';
   let editarSelectedClient = '';
   let editarImageFile = null;
@@ -1259,7 +1477,7 @@
     document.getElementById('editarModeEdit').classList.toggle('active', mode === 'edit');
     document.getElementById('editarPickerRow').style.display = mode === 'edit' ? 'block' : 'none';
     document.getElementById('editarSubmitBtn').textContent =
-      mode === 'add' ? 'Adicionar Paciente →' : 'Salvar Alterações →';
+      mode === 'add' ? 'Add Client →' : 'Salvar Alterações →';
     if (mode === 'add') clearEditarForm();
     else { document.getElementById('editarClientInput').value = ''; editarSelectedClient = ''; }
   }
@@ -1286,7 +1504,7 @@
     const names    = allClients.map(r => r.fields['ClientName']).filter(Boolean);
     const filtered = names.filter(n => n.toLowerCase().includes(query));
     if (filtered.length === 0) {
-      dropdown.innerHTML = '<div class="client-dropdown-empty">Nenhum paciente encontrado</div>';
+      dropdown.innerHTML = '<div class="client-dropdown-empty">No clients found</div>';
     } else {
       dropdown.innerHTML = filtered.map(name => {
         const safe = name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -1317,12 +1535,12 @@
 
   async function submitEditarForm() {
     const name = document.getElementById('ef-name').value.trim();
-    if (!name) { showToast('Preencha o nome do paciente.', false); return; }
+    if (!name) { showToast('Please fill in the client name.', false); return; }
 
     const btn = document.getElementById('editarSubmitBtn');
     btn.disabled = true;
     const originalLabel = btn.textContent;
-    btn.textContent = 'Salvando...';
+    btn.textContent = 'Saving...';
 
     const record = allClients.find(r => r.fields['ClientName'] === name);
     const currentImageUrl      = record?.fields['Image']?.[0]?.url      || null;
@@ -1349,18 +1567,35 @@
 
       if (editarImageFile) clearEditarImage();
 
-      const label = editarMode === 'add' ? 'adicionado' : 'atualizado';
+      // Upload PDF separadamente se selecionado
+      if (editarPdfFile) {
+        try {
+          const pdfForm = new FormData();
+          pdfForm.append('action',     'uploadProntuario');
+          pdfForm.append('sessionId',  SESSION_ID);
+          pdfForm.append('clientName', name);
+          pdfForm.append('file', editarPdfFile, editarPdfFile.name);
+          const pdfRes = await fetch(N8N_EDITAR_WEBHOOK, { method: 'POST', body: pdfForm });
+          if (!pdfRes.ok) throw new Error(`Status ${pdfRes.status}`);
+          showToast('Document enviado!', true);
+          clearEditarPdf();
+        } catch (pdfErr) {
+          showToast('Error uploading PDF: ' + pdfErr.message, false);
+        }
+      }
+
+      const label = editarMode === 'add' ? 'added' : 'updated';
       const msg = document.getElementById('editarStatusMsg');
-      msg.textContent = `✓ Paciente ${label} com sucesso!`;
+      msg.textContent = `✓ Client ${label} com sucesso!`;
       msg.style.display = 'block';
-      showToast(`Paciente ${label}!`, true);
+      showToast(`Client ${label}!`, true);
       lastUploadedClient = name;
       setTimeout(() => { if (lastUploadedClient === name) lastUploadedClient = null; }, 30000);
       if (editarMode === 'add') clearEditarForm();
       setTimeout(() => loadClientsTable(), 1500);
       setTimeout(() => { msg.style.display = 'none'; }, 4000);
     } catch (err) {
-      showToast('Erro ao salvar: ' + err.message, false);
+      showToast('Error saving: ' + err.message, false);
     } finally {
       btn.disabled = false;
       btn.textContent = originalLabel;
