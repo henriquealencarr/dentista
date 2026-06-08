@@ -1337,7 +1337,8 @@
       formData.append('caseName',             document.getElementById('ef-case').value.trim());
       formData.append('lawyer',               document.getElementById('ef-lawyer').value.trim());
       formData.append('status',               document.getElementById('ef-status').value);
-      formData.append('deadline',             document.getElementById('ef-deadline').value);
+      const deadlineVal = document.getElementById('ef-deadline').value;
+      if (deadlineVal) formData.append('deadline', deadlineVal);
       formData.append('currentImageUrl',      currentImageUrl      || '');
       formData.append('currentProntuarioUrl', currentProntuarioUrl || '');
       if (editarImageFile) {
