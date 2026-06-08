@@ -20,7 +20,7 @@
   <div class="top-header-actions">
     <button class="btn-header btn-header-outline" style="display:inline-flex;align-items:center;gap:6px;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      Sair
+      Sign Out
     </button>
   </div>
 </header>
@@ -39,11 +39,11 @@
       </button>
       <button class="panel-tab" id="ptab-editar" onclick="switchPanelTab('editar')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        Editar
+        Edit
       </button>
       <button class="panel-tab" id="ptab-documentos" onclick="switchPanelTab('documentos')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        Documentos
+        Documents
       </button>
     </div>
   </div>
@@ -57,10 +57,23 @@
       </div>
       <div class="select-wrap">
         <select id="statusFilter" onchange="filterClients()" onfocus="this.parentElement.classList.add('open')" onblur="this.parentElement.classList.remove('open')">
-          <option value="">Todos os status</option>
-          <option value="Todo">Todo</option>
-          <option value="In progress">In progress</option>
-          <option value="Done">Done</option>
+          <option value="">All statuses</option>
+          <option value="Active">Active</option>
+          <option value="Under Contract">Under Contract</option>
+          <option value="In Escrow">In Escrow</option>
+                  <option value="Closed">Closed</option>
+                  <option value="Cancelled">Cancelled</option>
+        </select>
+        <svg class="select-arrow" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="select-wrap">
+        <select id="sortFilter" onchange="filterClients()" onfocus="this.parentElement.classList.add('open')" onblur="this.parentElement.classList.remove('open')">
+          <option value="">Sort by...</option>
+          <option value="name-asc">Name A–Z</option>
+          <option value="name-desc">Name Z–A</option>
+          <option value="closing-asc">Closing Date ↑</option>
+          <option value="closing-desc">Closing Date ↓</option>
+          <option value="agent-asc">Agent A–Z</option>
         </select>
         <svg class="select-arrow" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
@@ -79,8 +92,8 @@
             <th>Agent</th>
             <th>Status</th>
             <th>Closing Date</th>
-            <th>Telefone</th>
-            <th style="text-align:center;">Documentos</th>
+            <th>Phone</th>
+            <th style="text-align:center;">Documents</th>
           </tr>
         </thead>
         <tbody id="clientsTableBody">
@@ -147,14 +160,16 @@
           <tbody>
             <tr class="editar-form-row">
               <td><input class="ef-input" id="ef-name" type="text" placeholder="Full name..." /></td>
-              <td><input class="ef-input" id="ef-phone" type="tel" placeholder="Telefone..." /></td>
+              <td><input class="ef-input" id="ef-phone" type="tel" placeholder="Phone..." /></td>
               <td><input class="ef-input" id="ef-case" type="text" placeholder="Property type..." /></td>
               <td><input class="ef-input" id="ef-lawyer" type="text" placeholder="Agent name..." /></td>
               <td>
                 <select class="ef-select" id="ef-status">
-                  <option value="Todo">Todo</option>
-                  <option value="In progress">In progress</option>
-                  <option value="Done">Done</option>
+                  <option value="Active">Active</option>
+                  <option value="Under Contract">Under Contract</option>
+                  <option value="In Escrow">In Escrow</option>
+                  <option value="Closed">Closed</option>
+                  <option value="Cancelled">Cancelled</option>
                 </select>
               </td>
               <td><input class="ef-input" id="ef-deadline" type="date" /></td>
@@ -183,7 +198,7 @@
       <!-- Actions -->
       <div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 2px 14px;gap:8px;">
         <span id="editarStatusMsg" style="display:none;font-size:13px;color:#059669;font-weight:500;flex:1;"></span>
-        <button class="editar-clear-btn" onclick="clearEditarForm()">Limpar</button>
+        <button class="editar-clear-btn" onclick="clearEditarForm()">Clear</button>
         <button class="editar-submit-btn" id="editarSubmitBtn" onclick="submitEditarForm()">
           Add Client →
         </button>
@@ -197,7 +212,7 @@
     <div class="clients-toolbar" style="gap:8px;">
       <div class="clients-search-wrap">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="docSearch" placeholder="Buscar documento..." oninput="filterDocs()" />
+        <input type="text" id="docSearch" placeholder="Search document..." oninput="filterDocs()" />
       </div>
       <button class="refresh-btn" onclick="loadDocumentsPanel(true)" title="Atualizar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
@@ -709,7 +724,7 @@
     try {
       const record = allClients.find(r => r.fields['ClientName'] === clientName);
       const currentImageUrl      = record?.fields['Image']?.[0]?.url      || '';
-      const currentProntuarioUrl = record?.fields['Prontuario']?.[0]?.url || '';
+      const currentProntuarioUrl = record?.fields['Documents']?.[0]?.url || '';
 
       const formData = new FormData();
       formData.append('action',               'editImage');
@@ -717,7 +732,7 @@
       formData.append('clientName',           clientName);
       formData.append('phone',                record?.fields['Phone']      || '');
       formData.append('caseName',             record?.fields['Case Name']  || '');
-      formData.append('lawyer',               record?.fields['Lawyer']     || '');
+      formData.append('agent',                record?.fields['Agent']     || '');
       formData.append('status',               record?.fields['Status']     || '');
       formData.append('deadline',             record?.fields['Deadline']   || '');
       formData.append('currentImageUrl',      currentImageUrl);
@@ -1092,7 +1107,7 @@
     if (window.innerWidth < 768) switchTab('chat');
     const matchingDoc = allDocs.find(d => d.file_name.toLowerCase().includes(name.toLowerCase()));
     const fileName = matchingDoc ? matchingDoc.file_name : name + '_document.pdf';
-    sendShortcut(`Resuma o documento "${fileName}"`);
+    sendShortcut(`Summarize the document "${fileName}"`);
   }
 
   window.addEventListener('DOMContentLoaded', () => {
@@ -1144,39 +1159,41 @@
 
     if (records.length === 0) {
       tbody.innerHTML = '<tr><td colspan="8" class="table-loading">No clients found.</td></tr>';
-      document.getElementById('clientsCount').textContent = '0 paciente(s) encontrado(s)';
+      document.getElementById('clientsCount').textContent = '0 client(s) found';
       return;
     }
 
-    document.getElementById('clientsCount').textContent = `${records.length} paciente(s) encontrado(s)`;
+    document.getElementById('clientsCount').textContent = `${records.length} client(s) found`;
 
     tbody.innerHTML = records.map(r => {
       const f = r.fields;
       const name     = f['ClientName'] || '—';
       const caseName = f['Case Name']   || '—';
-      const lawyer   = f['Lawyer']      || '—';
+      const lawyer   = f['Agent']      || '—';
       const status   = f['Status']      || '—';
       const deadlineVal = f['Deadline'];
       const deadline = deadlineVal ? new Date(deadlineVal).toLocaleDateString('pt-BR') : '—';
       const phone    = f['Phone']       || '—';
 
-      let badgeClass = 'status-todo';
-      if (status === 'In progress') badgeClass = 'status-progress';
-      else if (status === 'Done')   badgeClass = 'status-done';
+      let badgeClass = 'status-active';
+      if (status === 'Under Contract') badgeClass = 'status-under-contract';
+      else if (status === 'In Escrow') badgeClass = 'status-in-escrow';
+      else if (status === 'Closed')    badgeClass = 'status-closed';
+      else if (status === 'Cancelled') badgeClass = 'status-cancelled';
 
       const image = f['Image'] && f['Image'][0] ? f['Image'][0].url : null;
       const imgHtml = image
         ? `<img src="${image}" alt="${name}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;display:block;">`
         : `<div style="width:36px;height:36px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;">👤</div>`;
 
-      const pdfUrl = (f['Prontuario'] && f['Prontuario'][0]) ? f['Prontuario'][0].url : '';
+      const pdfUrl = (f['Documents'] && f['Documents'][0]) ? f['Documents'][0].url : '';
       clientDocUrls[name] = pdfUrl;
       const safeNameAttr = name.replace(/'/g, "\\'");
       const matchingDoc = allDocs.find(d => d.file_name.toLowerCase().includes(name.toLowerCase()));
       const hasDoc = pdfUrl || matchingDoc;
       const docBtn = hasDoc
-        ? `<button onclick="openDocModal('${safeNameAttr}')" title="Ver prontuário de ${name}" style="background:none;border:1px solid var(--border);border-radius:8px;padding:5px 8px;cursor:pointer;color:var(--accent);display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;font-family:inherit;transition:background 0.2s,color 0.2s;" onmouseover="this.style.background='var(--accent)';this.style.color='white'" onmouseout="this.style.background='none';this.style.color='var(--accent)'">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Ver
+        ? `<button onclick="openDocModal('${safeNameAttr}')" title="View document for ${name}" style="background:none;border:1px solid var(--border);border-radius:8px;padding:5px 8px;cursor:pointer;color:var(--accent);display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;font-family:inherit;transition:background 0.2s,color 0.2s;" onmouseover="this.style.background='var(--accent)';this.style.color='white'" onmouseout="this.style.background='none';this.style.color='var(--accent)'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>View
           </button>`
         : `<span style="color:var(--text-light);font-size:12px;">—</span>`;
 
@@ -1242,17 +1259,17 @@
       docsLoaded = true;
       renderDocumentsPanel(allDocs);
     } catch(e) {
-      list.innerHTML = '<div class="docs-loading">Erro ao carregar documentos.</div>';
+      list.innerHTML = '<div class="docs-loading">Error loading documents.</div>';
       document.getElementById('docsCount').textContent = 'Erro';
     }
   }
 
   function renderDocumentsPanel(docs) {
     const list = document.getElementById('docsList');
-    document.getElementById('docsCount').textContent = `${docs.length} documento(s) encontrado(s)`;
+    document.getElementById('docsCount').textContent = `${docs.length} document(s) found`;
 
     if (docs.length === 0) {
-      list.innerHTML = '<div class="docs-loading">Nenhum documento encontrado.</div>';
+      list.innerHTML = '<div class="docs-loading">No documents found.</div>';
       return;
     }
 
@@ -1271,11 +1288,11 @@
           <div class="doc-icon">📄</div>
           <div class="doc-info">
             <div class="doc-name" title="${safeName}">${shortName}</div>
-            <div class="doc-meta">${doc.chunks} trechos indexados · PDF</div>
+            <div class="doc-meta">${doc.chunks} indexed chunks · PDF</div>
           </div>
           <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
             ${downloadBtn}
-            <button class="doc-card-btn" onclick="sendShortcut('Resuma o documento &quot;${safeName}&quot;')">
+            <button class="doc-card-btn" onclick="sendShortcut('Summarize the document &quot;${safeName}&quot;')">
               Resumir →
             </button>
           </div>
@@ -1293,16 +1310,23 @@
   function filterClients() {
     const search = document.getElementById('clientSearch').value.toLowerCase();
     const status = document.getElementById('statusFilter').value;
+    const sort   = document.getElementById('sortFilter').value;
 
-    const filtered = allClients.filter(r => {
+    let filtered = allClients.filter(r => {
       const f = r.fields;
       const matchSearch = !search ||
         (f['ClientName'] || '').toLowerCase().includes(search) ||
         (f['Case Name']   || '').toLowerCase().includes(search) ||
-        (f['Lawyer']      || '').toLowerCase().includes(search);
+        (f['Agent']      || '').toLowerCase().includes(search);
       const matchStatus = !status || (f['Status'] || '') === status;
       return matchSearch && matchStatus;
     });
+
+    if (sort === 'name-asc')     filtered.sort((a,b) => (a.fields['ClientName']||'').localeCompare(b.fields['ClientName']||''));
+    if (sort === 'name-desc')    filtered.sort((a,b) => (b.fields['ClientName']||'').localeCompare(a.fields['ClientName']||''));
+    if (sort === 'closing-asc')  filtered.sort((a,b) => (a.fields['Deadline']||'9999').localeCompare(b.fields['Deadline']||'9999'));
+    if (sort === 'closing-desc') filtered.sort((a,b) => (b.fields['Deadline']||'').localeCompare(a.fields['Deadline']||''));
+    if (sort === 'agent-asc')    filtered.sort((a,b) => (a.fields['Agent']||'').localeCompare(b.fields['Agent']||''));
 
     renderClientsTable(filtered);
   }
@@ -1486,7 +1510,7 @@
     ['ef-name','ef-phone','ef-case','ef-lawyer','ef-deadline'].forEach(id => {
       document.getElementById(id).value = '';
     });
-    document.getElementById('ef-status').value = 'Todo';
+    document.getElementById('ef-status').value = 'Active';
     editarSelectedClient = '';
     clearEditarImage();
     document.getElementById('editarStatusMsg').style.display = 'none';
@@ -1527,8 +1551,8 @@
       document.getElementById('ef-name').value     = f['ClientName'] || '';
       document.getElementById('ef-phone').value    = f['Phone']      || '';
       document.getElementById('ef-case').value     = f['Case Name']  || '';
-      document.getElementById('ef-lawyer').value   = f['Lawyer']     || '';
-      document.getElementById('ef-status').value   = f['Status']     || 'Todo';
+      document.getElementById('ef-lawyer').value   = f['Agent']     || '';
+      document.getElementById('ef-status').value   = f['Status'] || 'Active';
       document.getElementById('ef-deadline').value = f['Deadline']   || '';
     }
   }
@@ -1544,18 +1568,20 @@
 
     const record = allClients.find(r => r.fields['ClientName'] === name);
     const currentImageUrl      = record?.fields['Image']?.[0]?.url      || null;
-    const currentProntuarioUrl = record?.fields['Prontuario']?.[0]?.url || null;
+    const currentProntuarioUrl = record?.fields['Documents']?.[0]?.url || null;
 
     try {
+      const deadlineInput = document.getElementById('ef-deadline').value;
+
       const formData = new FormData();
       formData.append('action',               editarMode);
       formData.append('sessionId',            SESSION_ID);
       formData.append('clientName',           name);
       formData.append('phone',                document.getElementById('ef-phone').value.trim());
       formData.append('caseName',             document.getElementById('ef-case').value.trim());
-      formData.append('lawyer',               document.getElementById('ef-lawyer').value.trim());
+      formData.append('agent',                document.getElementById('ef-lawyer').value.trim());
       formData.append('status',               document.getElementById('ef-status').value);
-      formData.append('deadline',             document.getElementById('ef-deadline').value);
+      if (deadlineInput) formData.append('deadline', deadlineInput);
       formData.append('currentImageUrl',      currentImageUrl      || '');
       formData.append('currentProntuarioUrl', currentProntuarioUrl || '');
       if (editarImageFile) {
@@ -1574,6 +1600,11 @@
           pdfForm.append('action',     'uploadProntuario');
           pdfForm.append('sessionId',  SESSION_ID);
           pdfForm.append('clientName', name);
+          pdfForm.append('phone',      document.getElementById('ef-phone').value.trim());
+          pdfForm.append('caseName',   document.getElementById('ef-case').value.trim());
+          pdfForm.append('agent',      document.getElementById('ef-lawyer').value.trim());
+          pdfForm.append('status',     document.getElementById('ef-status').value);
+          if (deadlineInput) pdfForm.append('deadline', deadlineInput);
           pdfForm.append('file', editarPdfFile, editarPdfFile.name);
           const pdfRes = await fetch(N8N_EDITAR_WEBHOOK, { method: 'POST', body: pdfForm });
           if (!pdfRes.ok) throw new Error(`Status ${pdfRes.status}`);
